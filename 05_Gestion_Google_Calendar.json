@@ -1,0 +1,96 @@
+{
+    "name": "05_Gestion_Google_Calendar",
+    "nodes": [
+        {
+            "parameters": {
+                "pollTimes": {
+                    "item": [
+                        {
+                            "mode": "everyMinute"
+                        }
+                    ]
+                },
+                "calendar": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "primary"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleCalendarTrigger",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "gcal-trigger",
+            "name": "Google Calendar Trigger"
+        },
+        {
+            "parameters": {
+                "operation": "create",
+                "calendar": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "primary"
+                },
+                "start": "2023-01-01T10:00:00",
+                "end": "2023-01-01T11:00:00",
+                "summary": "New Meeting",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleCalendar",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "gcal-create",
+            "name": "Create Event"
+        },
+        {
+            "parameters": {
+                "operation": "getAll",
+                "calendar": {
+                    "__rl": true,
+                    "mode": "list",
+                    "value": "primary"
+                },
+                "limit": 5,
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleCalendar",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "gcal-get-all",
+            "name": "Get Events"
+        }
+    ],
+    "connections": {
+        "Google Calendar Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Create Event",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Event": {
+            "main": [
+                [
+                    {
+                        "node": "Get Events",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

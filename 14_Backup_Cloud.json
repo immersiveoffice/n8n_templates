@@ -1,0 +1,96 @@
+{
+    "name": "14_Backup_Cloud",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "days",
+                            "triggerAtHour": 2
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.schedule",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "schedule-trigger",
+            "name": "Schedule"
+        },
+        {
+            "parameters": {
+                "fileSelector": "/data/backup.zip"
+            },
+            "type": "n8n-nodes-base.readBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "read-backup",
+            "name": "Read Backup File"
+        },
+        {
+            "parameters": {
+                "operation": "upload",
+                "fileId": "backup.zip",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "upload-gdrive",
+            "name": "Upload to GDrive"
+        },
+        {
+            "parameters": {
+                "bucketName": "my-backups",
+                "fileName": "backup.zip"
+            },
+            "type": "n8n-nodes-base.awsS3",
+            "typeVersion": 1,
+            "position": [
+                400,
+                200
+            ],
+            "id": "upload-s3",
+            "name": "Upload to S3"
+        }
+    ],
+    "connections": {
+        "Schedule": {
+            "main": [
+                [
+                    {
+                        "node": "Read Backup File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Backup File": {
+            "main": [
+                [
+                    {
+                        "node": "Upload to GDrive",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Upload to S3",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

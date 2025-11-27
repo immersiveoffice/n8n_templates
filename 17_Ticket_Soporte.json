@@ -1,0 +1,70 @@
+{
+    "name": "17_Ticket_Soporte",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "create-ticket",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "projectKey": "SUP",
+                "summary": "={{$json.subject}}",
+                "description": "={{$json.description}}",
+                "additionalFields": {}
+            },
+            "type": "n8n-nodes-base.jira",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "jira-create",
+            "name": "Jira Create"
+        },
+        {
+            "parameters": {
+                "subject": "={{$json.subject}}",
+                "comment": {
+                    "body": "={{$json.description}}"
+                }
+            },
+            "type": "n8n-nodes-base.zendesk",
+            "typeVersion": 1,
+            "position": [
+                200,
+                200
+            ],
+            "id": "zendesk-create",
+            "name": "Zendesk Create"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Jira Create",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Zendesk Create",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

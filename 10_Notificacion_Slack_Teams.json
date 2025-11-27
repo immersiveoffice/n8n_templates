@@ -1,0 +1,67 @@
+{
+    "name": "10_Notificacion_Slack_Teams",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "notify",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "channel": "general",
+                "text": "New alert received!",
+                "otherOptions": {}
+            },
+            "type": "n8n-nodes-base.slack",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "slack-notify",
+            "name": "Slack Notification"
+        },
+        {
+            "parameters": {
+                "webhookUrl": "https://outlook.office.com/webhook/...",
+                "text": "New alert received!"
+            },
+            "type": "n8n-nodes-base.microsoftTeams",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "teams-notify",
+            "name": "Teams Notification"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Slack Notification",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Teams Notification",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

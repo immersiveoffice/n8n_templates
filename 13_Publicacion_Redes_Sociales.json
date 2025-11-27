@@ -1,0 +1,64 @@
+{
+    "name": "13_Publicacion_Redes_Sociales",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "post-social",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "text": "={{$json.content}}"
+            },
+            "type": "n8n-nodes-base.twitter",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "twitter-post",
+            "name": "Twitter Post"
+        },
+        {
+            "parameters": {
+                "text": "={{$json.content}}"
+            },
+            "type": "n8n-nodes-base.linkedin",
+            "typeVersion": 1,
+            "position": [
+                200,
+                200
+            ],
+            "id": "linkedin-post",
+            "name": "LinkedIn Post"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Twitter Post",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "LinkedIn Post",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

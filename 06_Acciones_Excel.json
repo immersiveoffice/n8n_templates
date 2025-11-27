@@ -1,0 +1,96 @@
+{
+    "name": "06_Acciones_Excel",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "excel-ops",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "fileSelector": "/data/input.xlsx"
+            },
+            "type": "n8n-nodes-base.readBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "read-excel",
+            "name": "Read Binary File"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "type": "n8n-nodes-base.spreadsheetFile",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "parse-excel",
+            "name": "Spreadsheet File"
+        },
+        {
+            "parameters": {
+                "operation": "toFile",
+                "fileFormat": "xlsx",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.spreadsheetFile",
+            "typeVersion": 1,
+            "position": [
+                600,
+                0
+            ],
+            "id": "write-excel",
+            "name": "Write Excel"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Read Binary File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Binary File": {
+            "main": [
+                [
+                    {
+                        "node": "Spreadsheet File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Spreadsheet File": {
+            "main": [
+                [
+                    {
+                        "node": "Write Excel",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

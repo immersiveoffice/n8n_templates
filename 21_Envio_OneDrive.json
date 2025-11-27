@@ -1,0 +1,74 @@
+{
+    "name": "21_Envio_OneDrive",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "onedrive-upload",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "fileSelector": "/data/file.txt"
+            },
+            "type": "n8n-nodes-base.readBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "read-file",
+            "name": "Read File"
+        },
+        {
+            "parameters": {
+                "resource": "file",
+                "operation": "upload",
+                "fileContent": "data",
+                "parentId": "root",
+                "name": "file.txt"
+            },
+            "type": "n8n-nodes-base.microsoftOneDrive",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "onedrive-upload",
+            "name": "OneDrive Upload"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Read File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read File": {
+            "main": [
+                [
+                    {
+                        "node": "OneDrive Upload",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
