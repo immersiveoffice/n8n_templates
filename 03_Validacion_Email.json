@@ -1,0 +1,70 @@
+{
+    "name": "03_Validacion_Email",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "validate-email",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Validates email format\n// Expects input: { \"email\": \"test@example.com\" }\nconst email = $input.all()[0].json.email;\n\nlet isValid = false;\nlet message = \"Invalid email format\";\n\n// Standard email regex\nconst regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$/;\n\nif (email && regex.test(email)) {\n  isValid = true;\n  message = \"Valid email format\";\n}\n\nreturn {\n  json: {\n    email,\n    isValid,\n    message\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "validate-email-code",
+            "name": "Validate Email"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "respond-webhook",
+            "name": "Respond to Webhook"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Validate Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate Email": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,94 @@
+{
+    "name": "12_Enriquecimiento_Leads",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "enrich-lead",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "url": "https://api.clearbit.com/v2/combined/find",
+                "method": "GET",
+                "authentication": "headerAuth",
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer KEY"
+                        }
+                    ]
+                },
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "email",
+                            "value": "={{$json.email}}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "enrich-api",
+            "name": "Enrichment API"
+        },
+        {
+            "parameters": {
+                "mode": "mergeByPosition"
+            },
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "merge-data",
+            "name": "Merge Data"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Enrichment API",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Enrichment API": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

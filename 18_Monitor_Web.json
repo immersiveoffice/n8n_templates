@@ -1,0 +1,113 @@
+{
+    "name": "18_Monitor_Web",
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "minutes",
+                            "minutesInterval": 5
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.schedule",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "schedule-trigger",
+            "name": "Schedule"
+        },
+        {
+            "parameters": {
+                "url": "https://mywebsite.com",
+                "options": {
+                    "responseCode": true
+                }
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "check-site",
+            "name": "Check Site"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{$json.statusCode}}",
+                            "operation": "notEqual",
+                            "value2": 200
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "check-status",
+            "name": "If Status != 200"
+        },
+        {
+            "parameters": {
+                "toEmail": "admin@example.com",
+                "subject": "Website Down!",
+                "text": "The website responded with status: {{$json.statusCode}}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 1,
+            "position": [
+                600,
+                0
+            ],
+            "id": "alert-email",
+            "name": "Send Alert"
+        }
+    ],
+    "connections": {
+        "Schedule": {
+            "main": [
+                [
+                    {
+                        "node": "Check Site",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Site": {
+            "main": [
+                [
+                    {
+                        "node": "If Status != 200",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "If Status != 200": {
+            "main": [
+                [
+                    {
+                        "node": "Send Alert",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

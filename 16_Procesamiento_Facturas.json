@@ -1,0 +1,89 @@
+{
+    "name": "16_Procesamiento_Facturas",
+    "nodes": [
+        {
+            "parameters": {
+                "pollTimes": {
+                    "item": [
+                        {
+                            "mode": "everyMinute"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailReadImap",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "email-trigger",
+            "name": "Email Trigger"
+        },
+        {
+            "parameters": {
+                "url": "https://api.ocr.com/parse",
+                "method": "POST",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "file",
+                            "value": "={{$binary.data}}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "ocr-api",
+            "name": "OCR API"
+        },
+        {
+            "parameters": {
+                "operation": "insert",
+                "schema": "public",
+                "table": "invoices",
+                "columns": "amount, date, vendor",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "save-invoice",
+            "name": "Save Invoice"
+        }
+    ],
+    "connections": {
+        "Email Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "OCR API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "OCR API": {
+            "main": [
+                [
+                    {
+                        "node": "Save Invoice",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

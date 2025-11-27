@@ -1,0 +1,72 @@
+{
+    "name": "20_Envio_FTP",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "ftp-upload",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "fileSelector": "/data/file.txt"
+            },
+            "type": "n8n-nodes-base.readBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "read-file",
+            "name": "Read File"
+        },
+        {
+            "parameters": {
+                "operation": "upload",
+                "path": "/remote/path/file.txt",
+                "binaryPropertyName": "data"
+            },
+            "type": "n8n-nodes-base.ftp",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "ftp-upload",
+            "name": "FTP Upload"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Read File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read File": {
+            "main": [
+                [
+                    {
+                        "node": "FTP Upload",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

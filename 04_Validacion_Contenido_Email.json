@@ -1,0 +1,70 @@
+{
+    "name": "04_Validacion_Contenido_Email",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "validate-content",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Validates email content for forbidden keywords or required terms\n// Expects input: { \"subject\": \"...\", \"body\": \"...\" }\nconst subject = $input.all()[0].json.subject || \"\";\nconst body = $input.all()[0].json.body || \"\";\n\nconst forbiddenKeywords = [\"spam\", \"buy now\", \"click here\"];\nconst requiredKeywords = [\"invoice\", \"project\"];\n\nlet issues = [];\n\nforbiddenKeywords.forEach(word => {\n  if (subject.toLowerCase().includes(word) || body.toLowerCase().includes(word)) {\n    issues.push(`Contains forbidden keyword: ${word}`);\n  }\n});\n\n// Example logic: must contain at least one required keyword if strict mode\n// For now just flagging\n\nreturn {\n  json: {\n    subject,\n    bodyLength: body.length,\n    issues,\n    isValid: issues.length === 0\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "validate-content-code",
+            "name": "Validate Content"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "respond-webhook",
+            "name": "Respond to Webhook"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Validate Content",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Validate Content": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

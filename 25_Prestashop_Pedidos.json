@@ -1,0 +1,71 @@
+{
+    "name": "25_Prestashop_Pedidos",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "list-orders",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT id_order, reference, total_paid, date_add, payment, current_state FROM ps_orders ORDER BY date_add DESC LIMIT 50;"
+            },
+            "type": "n8n-nodes-base.mySql",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "mysql-query",
+            "name": "Get Orders"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "respond-webhook",
+            "name": "Respond to Webhook"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Get Orders",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Orders": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

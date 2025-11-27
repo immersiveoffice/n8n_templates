@@ -1,0 +1,95 @@
+{
+    "name": "07_Ficheros_Planos",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "file-ops",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "fileSelector": "/data/input.csv"
+            },
+            "type": "n8n-nodes-base.readBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "read-file",
+            "name": "Read File"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "type": "n8n-nodes-base.spreadsheetFile",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "parse-csv",
+            "name": "Parse CSV"
+        },
+        {
+            "parameters": {
+                "fileName": "/data/output.txt",
+                "content": "Processed data"
+            },
+            "type": "n8n-nodes-base.writeBinaryFile",
+            "typeVersion": 1,
+            "position": [
+                600,
+                0
+            ],
+            "id": "write-file",
+            "name": "Write File"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Read File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read File": {
+            "main": [
+                [
+                    {
+                        "node": "Parse CSV",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse CSV": {
+            "main": [
+                [
+                    {
+                        "node": "Write File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

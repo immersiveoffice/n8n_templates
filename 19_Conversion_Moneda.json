@@ -1,0 +1,71 @@
+{
+    "name": "19_Conversion_Moneda",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "convert-currency",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "url": "https://api.exchangerate-api.com/v4/latest/USD",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "get-rates",
+            "name": "Get Rates"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Convert amount from input using fetched rates\n// Input: { \"amount\": 100, \"target\": \"EUR\" }\nconst amount = $input.all()[0].json.amount || 0;\nconst target = $input.all()[0].json.target || \"EUR\";\nconst rates = $input.all()[0].json.rates;\n\nconst rate = rates[target];\nconst converted = amount * rate;\n\nreturn {\n  json: {\n    amount,\n    target,\n    rate,\n    converted\n  }\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "calculate",
+            "name": "Calculate"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Get Rates",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Rates": {
+            "main": [
+                [
+                    {
+                        "node": "Calculate",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

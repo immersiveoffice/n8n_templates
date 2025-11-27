@@ -1,0 +1,70 @@
+{
+  "name": "01_Validacion_Telefono",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "validate-phone",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simple regex for international phone validation (E.164 format preferred)\n// Expects input: { \"phone\": \"+1234567890\" }\nconst phone = $input.all()[0].json.phone;\nconst regex = /^\\+[1-9]\\d{1,14}$/;\n\nlet isValid = false;\nlet message = \"Invalid format\";\n\nif (phone && regex.test(phone)) {\n  isValid = true;\n  message = \"Valid E.164 format\";\n}\n\nreturn {\n  json: {\n    phone,\n    isValid,\n    message\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "validate-phone-code",
+      "name": "Validate Phone"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "respond-webhook",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Phone": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

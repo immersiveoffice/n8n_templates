@@ -1,0 +1,74 @@
+{
+    "name": "15_Onboarding_Empleado",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "onboard",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "toEmail": "={{$json.email}}",
+                "subject": "Welcome!",
+                "text": "Welcome to the team!",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "send-welcome-email",
+            "name": "Send Welcome Email"
+        },
+        {
+            "parameters": {
+                "email": "={{$json.email}}",
+                "name": "={{$json.name}}"
+            },
+            "type": "n8n-nodes-base.slack",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "create-slack-user",
+            "name": "Create Slack User"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Send Welcome Email",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Send Welcome Email": {
+            "main": [
+                [
+                    {
+                        "node": "Create Slack User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

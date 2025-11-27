@@ -1,0 +1,104 @@
+{
+    "name": "08_PostgreSQL_Ops",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "db-ops",
+                "responseMode": "lastNode",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "id": "webhook-trigger",
+            "name": "Webhook"
+        },
+        {
+            "parameters": {
+                "operation": "executeQuery",
+                "query": "SELECT * FROM users WHERE active = true LIMIT 10;"
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ],
+            "id": "postgres-select",
+            "name": "Postgres Select"
+        },
+        {
+            "parameters": {
+                "operation": "insert",
+                "schema": "public",
+                "table": "users",
+                "columns": "name, email",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ],
+            "id": "postgres-insert",
+            "name": "Postgres Insert"
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "schema": "public",
+                "table": "users",
+                "updateKey": "id",
+                "columns": "last_login",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.postgres",
+            "typeVersion": 1,
+            "position": [
+                600,
+                0
+            ],
+            "id": "postgres-update",
+            "name": "Postgres Update"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Postgres Select",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Postgres Select": {
+            "main": [
+                [
+                    {
+                        "node": "Postgres Insert",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Postgres Insert": {
+            "main": [
+                [
+                    {
+                        "node": "Postgres Update",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
