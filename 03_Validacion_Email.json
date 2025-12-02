@@ -1,70 +1,97 @@
 {
-    "name": "03_Validacion_Email",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "validate-email",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "jsCode": "// Validates email format\n// Expects input: { \"email\": \"test@example.com\" }\nconst email = $input.all()[0].json.email;\n\nlet isValid = false;\nlet message = \"Invalid email format\";\n\n// Standard email regex\nconst regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$/;\n\nif (email && regex.test(email)) {\n  isValid = true;\n  message = \"Valid email format\";\n}\n\nreturn {\n  json: {\n    email,\n    isValid,\n    message\n  }\n};"
-            },
-            "type": "n8n-nodes-base.code",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "validate-email-code",
-            "name": "Validate Email"
-        },
-        {
-            "parameters": {
-                "options": {}
-            },
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "respond-webhook",
-            "name": "Respond to Webhook"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Validate Email",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Validate Email": {
-            "main": [
-                [
-                    {
-                        "node": "Respond to Webhook",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "name": "03_Validacion_Email",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "validate-email",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "41dc9072-fb48-4eb6-a3ca-353cbd82a29c",
+      "name": "Webhook",
+      "webhookId": "30b1726a-1965-45a7-9d9b-ddef358b2fad"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validates email format\n// Expects input: { \"email\": \"test@example.com\" }\n\nlet email = $input.first().json.query.email || $input.first().json.body.email || null;\n\nlet isValid = false;\nlet message = \"Invalid email format\";\n\n// Standard email regex\nconst regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$/;\n\nif (email && regex.test(email)) {\n  isValid = true;\n  message = \"Valid email format\";\n}\n\nreturn {\n  json: {\n    email,\n    isValid,\n    message\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "331e06e8-9372-4a8f-bf5e-11479fd90815",
+      "name": "Validate Email"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "94eee06f-92c7-4e54-9b24-490e4935b6ee",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "## Como hacer test\n**Ejecuta el workflow** y usa una de las siguientes formas de llamada:\n\n**En tu explorador:** http://localhost:5678/webhook-test/validate-email/?email=test%40test.com\n\n**En tu consola:** curl \"http://localhost:5678/webhook-test/validate-email\"   -X GET   -H \"Content-Type: application/json\"   -d '{\"email\": \"test@test.com\"}'\n\n\n**Cambia 'localhost' por tu IP y puerto a conveniencia**\n\n**Nota:** Ten presente si la llamada es http por pruebas locales sin certificado o https\n\n\n[Enlace de descarga](http://localhost:3000/Immersive_Blog)",
+        "height": 336,
+        "width": 656
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "2d0a789e-f993-4abd-9175-e5e43d0f5537",
+      "name": "Sticky Note"
     }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cb55a4eb-e0b8-4ad2-b7aa-1cc954fdb50e",
+  "meta": {
+    "instanceId": "db5046136ee13ec96ef47271dd62188ada976dccb9830325785241b4a26e5acf"
+  },
+  "id": "IIuIKF5C47dLycJ1",
+  "tags": []
 }

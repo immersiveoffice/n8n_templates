@@ -11,22 +11,23 @@
       "typeVersion": 1,
       "position": [
         0,
-        0
+        80
       ],
-      "id": "webhook-trigger",
-      "name": "Webhook"
+      "id": "51d87c38-1d88-4db0-b90c-3bf1e3a78848",
+      "name": "Webhook",
+      "webhookId": "b2bee338-c2e8-4faa-a9f7-4c52ca27800b"
     },
     {
       "parameters": {
-        "jsCode": "// Simple regex for international phone validation (E.164 format preferred)\n// Expects input: { \"phone\": \"+1234567890\" }\nconst phone = $input.all()[0].json.phone;\nconst regex = /^\\+[1-9]\\d{1,14}$/;\n\nlet isValid = false;\nlet message = \"Invalid format\";\n\nif (phone && regex.test(phone)) {\n  isValid = true;\n  message = \"Valid E.164 format\";\n}\n\nreturn {\n  json: {\n    phone,\n    isValid,\n    message\n  }\n};"
+        "jsCode": "// Nodo Code / Function en n8n\n// Valida si un número de teléfono sigue el formato E.164 internacional\n// Ejemplos válidos: +34666666666, +12025550123, +5491123456789\n\n  // Recibe el teléfono de varias posibles entradas\n  let phone = $input.first().json.query.phone || $input.first().json.body.phone || '';\n\n  // Regex E.164 correcta (expresión regular real, NO string)\n  const regex = /^\\+[1-9]\\d{1,14}$/;\n\n  let isValid = false;\n  let message = 'Formato inválido';\n\n  if (phone && regex.test(phone)) {\n    isValid = true;\n    message = 'Formato E.164 válido';\n  } else if (phone === '') {\n    message = 'Teléfono vacío o no proporcionado';\n  } else if (!phone.startsWith('+')) {\n    message = 'Falta el signo + al inicio';\n  } else if (!/^\\+[1-9]/.test(phone)) {\n    message = 'Código de país inválido (debe empezar por + seguido de 1-9)';\n  } else if (phone.length > 16) {\n    message = 'Demasiado largo (máximo 15 dígitos + el +)';\n  }\n\n  return {\n    json: {\n      phone,\n      isValid,\n      message\n    }\n  };"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        200,
-        0
+        208,
+        80
       ],
-      "id": "validate-phone-code",
+      "id": "23a5589d-ef99-4f93-b772-dcd6d040ad8a",
       "name": "Validate Phone"
     },
     {
@@ -37,12 +38,28 @@
       "typeVersion": 1,
       "position": [
         400,
-        0
+        80
       ],
-      "id": "respond-webhook",
+      "id": "df94e9f8-29e9-4878-a61c-2941151b8aad",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "## Como hacer test\n**Ejecuta el workflow** y usa una de las siguientes formas de llamada:\n\n**En tu explorador:** http://localhost:5678/webhook-test/validate-phone/?phone=%2B34666123456\n\n**En tu consola:** curl \"http://localhost:5678/webhook-test/validate-phone\"   -X GET   -H \"Content-Type: application/json\"   -d '{\"phone\": \"+34695151515\"}'\n\n\n**Cambia 'localhost' por tu IP y puerto a conveniencia**\n\n**Nota:** Ten presente si la llamada es http por pruebas locales sin certificado o https\n\n\n[Enlace de descarga](http://localhost:3000/Immersive_Blog)",
+        "height": 336,
+        "width": 656
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "b03a8d52-9b20-41de-bebf-5b6e0e1cfc0a",
+      "name": "Sticky Note"
     }
   ],
+  "pinData": {},
   "connections": {
     "Webhook": {
       "main": [
@@ -66,5 +83,15 @@
         ]
       ]
     }
-  }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "76334119-39ef-4a09-9b87-97a9c341f24a",
+  "meta": {
+    "instanceId": "db5046136ee13ec96ef47271dd62188ada976dccb9830325785241b4a26e5acf"
+  },
+  "id": "lI6QHaREibEp1Ehh",
+  "tags": []
 }

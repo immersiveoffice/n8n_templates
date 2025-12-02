@@ -1,70 +1,97 @@
 {
-    "name": "02_Validacion_Nombre",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "validate-name",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "jsCode": "// Validates name: not empty, no numbers/special chars (basic check)\n// Expects input: { \"name\": \"John Doe\" }\nconst name = $input.all()[0].json.name;\n\nlet isValid = false;\nlet message = \"Invalid name\";\n\n// Allow letters, spaces, hyphens, apostrophes\nconst regex = /^[a-zA-Z\\u00C0-\\u00FF '.-]+$/;\n\nif (name && name.length > 1 && regex.test(name)) {\n  isValid = true;\n  message = \"Valid name\";\n}\n\nreturn {\n  json: {\n    name,\n    isValid,\n    message\n  }\n};"
-            },
-            "type": "n8n-nodes-base.code",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "validate-name-code",
-            "name": "Validate Name"
-        },
-        {
-            "parameters": {
-                "options": {}
-            },
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "respond-webhook",
-            "name": "Respond to Webhook"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Validate Name",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Validate Name": {
-            "main": [
-                [
-                    {
-                        "node": "Respond to Webhook",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "name": "02_Validacion_Nombre",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "validate-name",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "021ea071-3dab-492e-b247-925a1006f9be",
+      "name": "Webhook",
+      "webhookId": "fcf7f3ea-b43f-4d9e-8ecc-e910055dd04c"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validación de nombre: No debe estar vacío, no admite números ni caracteres especiales (chequeo básico)\n// Input: { \"name\": \"Francisco López\" }\n// Obtener el nombre de varias fuentes posibles\nlet name = $input.first().json.query.name || $input.first().json.body.name || null;\n\nlet isValid = false;\nlet message = \"Invalid name\";\n\n// Allow letters, spaces, hyphens, apostrophes\nconst regex = /^[a-zA-Z\\u00C0-\\u00FF '.-]+$/;\n\nif (name && name.length > 1 && regex.test(name)) {\n  isValid = true;\n  message = \"Valid name\";\n}\n\nreturn {\n  json: {\n    name,\n    isValid,\n    message\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e1f73284-042c-4e45-bb5d-cf304fc4024d",
+      "name": "Validate Name"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "97ebd3a5-d630-4f4f-ad7e-17aa483d6025",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "## Como hacer test\n**Ejecuta el workflow** y usa una de las siguientes formas de llamada:\n\n**En tu explorador:** http://localhost:5678/webhook-test/validate-name/?name=Francisco\n\n**En tu consola:** curl \"http://localhost:5678/webhook-test/validate-name\"   -X GET   -H \"Content-Type: application/json\"   -d '{\"name\": \"Francisco\"}'\n\n\n**Cambia 'localhost' por tu IP y puerto a conveniencia**\n\n**Nota:** Ten presente si la llamada es http por pruebas locales sin certificado o https\n\n\n[Enlace de descarga](http://localhost:3000/Immersive_Blog)",
+        "height": 336,
+        "width": 656
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -400
+      ],
+      "typeVersion": 1,
+      "id": "2ec3d8e3-211f-4bb2-abde-9dc797c99cc8",
+      "name": "Sticky Note"
     }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Name": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "106c0608-3f67-4641-8a3f-d15fbdc4ace7",
+  "meta": {
+    "instanceId": "db5046136ee13ec96ef47271dd62188ada976dccb9830325785241b4a26e5acf"
+  },
+  "id": "s3dwv2jzEsxRheO7",
+  "tags": []
 }
