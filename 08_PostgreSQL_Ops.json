@@ -1,104 +1,139 @@
 {
-    "name": "08_PostgreSQL_Ops",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "db-ops",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "operation": "executeQuery",
-                "query": "SELECT * FROM users WHERE active = true LIMIT 10;"
-            },
-            "type": "n8n-nodes-base.postgres",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "postgres-select",
-            "name": "Postgres Select"
-        },
-        {
-            "parameters": {
-                "operation": "insert",
-                "schema": "public",
-                "table": "users",
-                "columns": "name, email",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.postgres",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "postgres-insert",
-            "name": "Postgres Insert"
-        },
-        {
-            "parameters": {
-                "operation": "update",
-                "schema": "public",
-                "table": "users",
-                "updateKey": "id",
-                "columns": "last_login",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.postgres",
-            "typeVersion": 1,
-            "position": [
-                600,
-                0
-            ],
-            "id": "postgres-update",
-            "name": "Postgres Update"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Postgres Select",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Postgres Select": {
-            "main": [
-                [
-                    {
-                        "node": "Postgres Insert",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Postgres Insert": {
-            "main": [
-                [
-                    {
-                        "node": "Postgres Update",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Postgres Select",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Select": {
+      "main": [
+        [
+          {
+            "node": "Postgres Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Insert": {
+      "main": [
+        [
+          {
+            "node": "Postgres Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "AxksGSSw3edjAT6o",
+  "meta": null,
+  "name": "08_PostgreSQL_Ops",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "db-ops",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "c2eb96b4-9620-5946-89e8-af874db7b4e8"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, name, email, active FROM users WHERE active = true ORDER BY id LIMIT 10;"
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "postgres-select",
+      "name": "Postgres Select",
+      "credentials": {
+        "postgres": {
+          "id": "credPostgresLocal1",
+          "name": "Postgres local (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO users (name, email) VALUES ('Usuario Demo', 'demo+' || md5(random()::text || clock_timestamp()::text) || '@example.com') RETURNING id, name, email;"
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "postgres-insert",
+      "name": "Postgres Insert",
+      "credentials": {
+        "postgres": {
+          "id": "credPostgresLocal1",
+          "name": "Postgres local (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE users SET last_login = now() WHERE active = true RETURNING id, email, last_login;"
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [
+        600,
+        0
+      ],
+      "id": "postgres-update",
+      "name": "Postgres Update",
+      "credentials": {
+        "postgres": {
+          "id": "credPostgresLocal1",
+          "name": "Postgres local (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📋 08_PostgreSQL_Ops\n\n**Qué hace**\nDemostracion de las tres operaciones basicas contra PostgreSQL: SELECT de usuarios activos, INSERT de un usuario nuevo y UPDATE de la fecha de ultimo acceso.\n\n**Entrada**\nNada; las consultas van fijas en los nodos.\n\n**Salida**\nJSON con las filas actualizadas.\n\n**Requisitos para probarlo**\nContenedor `n8n_test_postgres` levantado y credencial **Postgres local (pruebas)**.\nTablas: `users`, `leads`, `invoices`.\nArrancar con: `docker compose -f docker-compose.servicios-prueba.yml up -d`\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/db-ops\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "327832fb-2af0-42cc-b9ae-1b0b518f1099"
 }

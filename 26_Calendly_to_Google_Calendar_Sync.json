@@ -1,0 +1,99 @@
+{
+  "active": false,
+  "connections": {
+    "Calendly Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "xem6BQlJrH8hud0d",
+  "meta": null,
+  "name": "26_Calendly to Google Calendar Sync",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        240,
+        304
+      ],
+      "id": "78fbc1b4-5d22-48b7-b5c1-ac418579be65"
+    },
+    {
+      "parameters": {},
+      "name": "Calendly Trigger",
+      "type": "n8n-nodes-base.calendlyTrigger",
+      "typeVersion": 1,
+      "position": [
+        464,
+        304
+      ],
+      "webhookId": "YOUR_WEBHOOK_ID_WILL_BE_GENERATED_HERE",
+      "id": "77e9af04-3524-447c-94bc-6466261ef0d0",
+      "credentials": {
+        "calendlyApi": {
+          "id": "YOUR_CALENDLY_CREDENTIAL_ID",
+          "name": "Calendly account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "primary"
+        },
+        "start": "={{$json[\"payload\"][\"scheduled_event\"][\"start_time\"]}}",
+        "end": "={{$json[\"payload\"][\"scheduled_event\"][\"end_time\"]}}",
+        "additionalFields": {}
+      },
+      "name": "Google Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        688,
+        304
+      ],
+      "id": "9343e1ca-ecb7-4696-a7ac-d4fac3e33dec",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📋 26_Calendly to Google Calendar Sync\n\n**Qué hace**\nCuando alguien reserva una cita en Calendly, crea el evento correspondiente en Google Calendar.\n\n**Entrada**\nEvento entrante de Calendly (trigger).\n\n**Salida**\nEvento creado en Google Calendar.\n\n**Requisitos para probarlo**\n**Credencial de Calendly** (token personal) y **credencial OAuth2 de Google Calendar**.\nNinguna de las dos esta configurada. Ademas Calendly necesita alcanzar el webhook desde internet, asi que hace falta una URL publica (tunel o dominio).\n\n**Cómo probarlo**\nSin credenciales ni URL publica no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        184
+      ]
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "tags": [],
+  "versionId": "1fd2ea67-61a0-46b7-88f4-59eb3267c3b5"
+}

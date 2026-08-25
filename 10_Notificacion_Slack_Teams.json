@@ -1,67 +1,91 @@
 {
-    "name": "10_Notificacion_Slack_Teams",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "notify",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "channel": "general",
-                "text": "New alert received!",
-                "otherOptions": {}
-            },
-            "type": "n8n-nodes-base.slack",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "slack-notify",
-            "name": "Slack Notification"
-        },
-        {
-            "parameters": {
-                "webhookUrl": "https://outlook.office.com/webhook/...",
-                "text": "New alert received!"
-            },
-            "type": "n8n-nodes-base.microsoftTeams",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "teams-notify",
-            "name": "Teams Notification"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Slack Notification",
-                        "type": "main",
-                        "index": 0
-                    },
-                    {
-                        "node": "Teams Notification",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Teams Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "UriBzY0wvFKpMBnp",
+  "meta": null,
+  "name": "10_Notificacion_Slack_Teams",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "notify",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "35874dcf-27ce-5d1e-b3da-b6182d72faf2"
+    },
+    {
+      "parameters": {
+        "channel": "general",
+        "text": "New alert received!",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "slack-notify",
+      "name": "Slack Notification"
+    },
+    {
+      "parameters": {
+        "webhookUrl": "https://outlook.office.com/webhook/...",
+        "text": "New alert received!"
+      },
+      "type": "n8n-nodes-base.microsoftTeams",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "teams-notify",
+      "name": "Teams Notification"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 10_Notificacion_Slack_Teams\n\n**Qué hace**\nManda el mismo aviso a un canal de Slack y a un canal de Teams.\n\n**Entrada**\nGET con los datos del aviso.\n\n**Salida**\nMensaje publicado en ambos canales.\n\n**Requisitos para probarlo**\n**Credencial de Slack** (token de app con permiso `chat:write` y un canal valido) y **URL de webhook entrante de Teams**.\nNinguna de las dos esta configurada.\n\n**Cómo probarlo**\nSin credenciales no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "78feb2ac-5b9d-4c21-a358-b94ec5fd0fd2"
 }

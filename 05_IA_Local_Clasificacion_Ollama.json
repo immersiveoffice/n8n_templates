@@ -1,0 +1,214 @@
+{
+  "active": false,
+  "connections": {
+    "Al pulsar 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Casos de Prueba (Tickets Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Casos de Prueba (Tickets Mock)": {
+      "main": [
+        [
+          {
+            "node": "Construir Petición Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Ticket": {
+      "main": [
+        [
+          {
+            "node": "Construir Petición Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consulta IA Local (Ollama)": {
+      "main": [
+        [
+          {
+            "node": "Parsear y Enriquecer Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear y Enriquecer Ticket": {
+      "main": [
+        [
+          {
+            "node": "Responder Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construir Petición Ollama": {
+      "main": [
+        [
+          {
+            "node": "Consulta IA Local (Ollama)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "L9BkRdLf400yKxbe",
+  "meta": null,
+  "name": "05_IA_Local_Clasificacion_Ollama",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -100
+      ],
+      "id": "manual-trigger-5",
+      "name": "Al pulsar 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      mensaje: 'Hola, llevamos 2 días sin poder exportar los informes de ventas a Excel desde la plataforma. Es urgente porque tenemos la junta directiva mañana a primera hora.',\n      remitente: 'director.financiero@cliente-corp.com'\n    }\n  },\n  {\n    json: {\n      mensaje: 'Buenos días, quisiéramos consultar si disponen de descuentos por volumen para una suscripción de 50 usuarios.',\n      remitente: 'compras@innovagroup.es'\n    }\n  },\n  {\n    json: {\n      mensaje: 'El cobro de la factura de este mes vino duplicado en la tarjeta de crédito. Por favor revisar y emitir abono.',\n      remitente: 'pagos@startup.io'\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        -100
+      ],
+      "id": "mock-ticket-data",
+      "name": "Casos de Prueba (Tickets Mock)"
+    },
+    {
+      "parameters": {
+        "path": "classify-support-ticket",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        150
+      ],
+      "id": "webhook-ia",
+      "name": "Webhook Ticket",
+      "webhookId": "classify-ticket-hook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        660,
+        300
+      ],
+      "id": "ollama-request",
+      "name": "Consulta IA Local (Ollama)",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================================================\n// Immersive Office - Procesamiento y Estructuración de Respuesta IA Local\n// ==========================================================================\nconst items = $input.all();\nconst results = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const inputItem = items[i];\n  let rawResponse = inputItem.json?.response || \"\";\n  let aiAnalysis = null;\n  let fallbackUsed = false;\n\n  // Intentar parsear el JSON retornado por Ollama\n  try {\n    if (typeof rawResponse === 'string' && rawResponse.trim().length > 0) {\n      const cleaned = rawResponse.replace(/```json/g, '').replace(/```/g, '').trim();\n      aiAnalysis = JSON.parse(cleaned);\n    } else if (typeof rawResponse === 'object' && rawResponse !== null && (rawResponse.categoria || rawResponse.urgencia)) {\n      aiAnalysis = rawResponse;\n    }\n  } catch (e) {\n    aiAnalysis = null;\n  }\n\n  // Si Ollama no está activo o hubo error, usamos fallback de simulación para tests inmediatos\n  if (!aiAnalysis) {\n    fallbackUsed = true;\n    let userMsg = inputItem.json?.mensaje || inputItem.json?.body?.mensaje || \"\";\n    if (!userMsg) {\n      try {\n        userMsg = $('Casos de Prueba (Tickets Mock)').all()[i]?.json?.mensaje || $('Webhook Ticket').first()?.json?.body?.mensaje || \"\";\n      } catch (e) {\n        userMsg = \"Consulta de soporte general\";\n      }\n    }\n\n    const msgLower = userMsg.toLowerCase();\n    let cat = \"Soporte Técnico\";\n    let urg = \"Media\";\n    let sent = \"Neutro\";\n    let action = \"Revisar ticket en cola estándar.\";\n\n    if (msgLower.includes('factura') || msgLower.includes('cobro') || msgLower.includes('abono')) {\n      cat = \"Facturación\";\n      urg = \"Alta\";\n      sent = \"Negativo\";\n      action = \"Verificar pasarela de pagos y emitir rectificación si procede.\";\n    } else if (msgLower.includes('descuento') || msgLower.includes('comprar') || msgLower.includes('suscripción') || msgLower.includes('precio') || msgLower.includes('usuarios')) {\n      cat = \"Ventas\";\n      urg = \"Baja\";\n      sent = \"Positivo\";\n      action = \"Asignar a ejecutivo de cuentas comerciales.\";\n    } else if (msgLower.includes('urgente') || msgLower.includes('caído') || msgLower.includes('junta') || msgLower.includes('bloqueo')) {\n      cat = \"Soporte Técnico\";\n      urg = \"Crítica\";\n      sent = \"Frustrado\";\n      action = \"Escalar a ingeniería L2 de inmediato y notificar al cliente.\";\n    }\n\n    aiAnalysis = {\n      categoria: cat,\n      urgencia: urg,\n      sentimiento: sent,\n      resumen_breve: userMsg.slice(0, 60) + \"...\",\n      accion_sugerida: action,\n      aviso: \"Respuesta generada por fallback de simulación. (Para IA real con Ollama: 'ollama run llama3.2')\"\n    };\n  }\n\n  results.push({\n    json: {\n      ticket_id: \"TCK-\" + Math.floor(1000 + Math.random() * 9000),\n      remitente: inputItem.json?.remitente || inputItem.json?.body?.remitente || \"cliente@corp.com\",\n      fecha_recepcion: new Date().toISOString(),\n      clasificacion_ia: aiAnalysis,\n      modo_ejecucion: fallbackUsed ? \"Modo Simulación / Fallback\" : \"Ollama Local LLM Activo\",\n      tiempo_respuesta_modelo_ms: inputItem.json?.total_duration ? Math.round(inputItem.json.total_duration / 1000000) : null,\n      fuente: \"immersiveoffice.online\"\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        20
+      ],
+      "id": "parse-ai-output",
+      "name": "Parsear y Enriquecer Ticket"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        540,
+        20
+      ],
+      "id": "respond-ai-webhook",
+      "name": "Responder Resultado",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### 🤖 Formación Immersive Office: Automatización con IA Local (Ollama + n8n)\n\n**Objetivo:** Clasificar tickets, extraer categoría, urgencia, sentimiento y acciones recomendadas con un modelo local (Llama 3.2 / Mistral) o simulación automática de respaldo.\n\n#### 🧪 Cómo hacer pruebas:\n\n**1. Modo 1 Clic (Directo en n8n):**\nHaz clic en el botón inferior **\"Test workflow\"** (o ejecuta el nodo *\"Al pulsar 'Test workflow'\"*). Clasificará automáticamente los 3 tickets de ejemplo (urgencia técnica, oportunidad de venta, reclamación de factura).\n\n**2. Modo Webhook (cURL):**\n```bash\ncurl -X POST \"http://localhost:5678/webhook-test/classify-support-ticket\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"mensaje\": \"Hola, se ha caído el servidor de producción y los clientes no pueden pagar. Ayuda urgente por favor!\"}'\n```\n\n📖 **Tutorial completo:** [immersiveoffice.online](https://immersiveoffice.online)",
+        "height": 420,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -550
+      ],
+      "id": "sticky-guide-5",
+      "name": "Guía del Flujo"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Monta la peticion a Ollama. Se hace aqui y no en una expresion del nodo HTTP\n// porque el prompt lleva comillas simples y saltos de linea que rompen la\n// expresion y dejan el \"JSON Body\" invalido.\nconst instrucciones = [\n  'Eres un clasificador experto de tickets de soporte empresarial.',\n  'Responde UNICAMENTE con un objeto JSON, sin texto adicional ni markdown.',\n  '',\n  'Campos obligatorios:',\n  '- categoria: uno de \"Soporte Tecnico\", \"Facturacion\", \"Ventas\", \"Reclamacion\"',\n  '- urgencia: uno de \"Baja\", \"Media\", \"Alta\", \"Critica\"',\n  '- sentimiento: uno de \"Positivo\", \"Neutro\", \"Negativo\", \"Frustrado\"',\n  '- resumen_breve: menos de 12 palabras',\n  '- accion_sugerida: siguiente paso para el agente de soporte',\n  '',\n  'Mensaje del cliente: ',\n].join('\\n');\n\nreturn $input.all().map(item => {\n  const j = item.json;\n  const mensaje = (j.body && j.body.mensaje) || (j.query && j.query.mensaje) || j.mensaje || 'Sin mensaje';\n  return { json: {\n    ...j,\n    mensaje,\n    payload: {\n      model: 'llama3.2:1b',\n      stream: false,\n      format: 'json',\n      prompt: instrucciones + mensaje,\n      options: { temperature: 0.2 },\n    },\n  }};\n});"
+      },
+      "id": "req-05",
+      "name": "Construir Petición Ollama",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📋 05_IA_Local_Clasificacion_Ollama\n\n**Qué hace**\nClasifica tickets de soporte con un modelo de IA que corre en el propio equipo (Ollama): asigna categoria, urgencia y sentimiento, y propone una accion para el agente.\n\n**Entrada**\nTrigger manual con 3 tickets de ejemplo, o GET con el parametro `mensaje`.\n\n**Salida**\nJSON con `clasificacion_ia` (categoria, urgencia, sentimiento, resumen_breve, accion_sugerida). Si `aviso` viene vacio, la respuesta es de la IA real; si trae texto, es el fallback simulado.\n\n**Requisitos para probarlo**\nOllama del equipo accesible desde el contenedor (regla de ufw para el puerto 11434 y `OLLAMA_HOST=0.0.0.0`). YA CONFIGURADO.\n\nModelo: `llama3.2:1b` (el instalado). Es pequeno y a veces acierta poco la categoria; con `qwen2.5-coder:14b` clasifica mejor, a cambio de tardar mas.\n\nLa peticion se monta en el nodo **Construir Peticion Ollama** y no en una expresion: el prompt lleva comillas y saltos de linea que dejaban el JSON Body invalido.\n\n**Cómo probarlo**\nPulsa **Execute workflow**, o bien:\n`curl \"http://localhost:5678/webhook/classify-support-ticket?mensaje=No%20puedo%20exportar%20informes\"`",
+        "height": 640,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        -220
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "2776638b-c1f1-47fa-8e84-f9e8d8d138b1"
+}

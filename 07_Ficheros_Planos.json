@@ -1,95 +1,144 @@
 {
-    "name": "07_Ficheros_Planos",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "file-ops",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "fileSelector": "/data/input.csv"
-            },
-            "type": "n8n-nodes-base.readBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "read-file",
-            "name": "Read File"
-        },
-        {
-            "parameters": {
-                "options": {}
-            },
-            "type": "n8n-nodes-base.spreadsheetFile",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "parse-csv",
-            "name": "Parse CSV"
-        },
-        {
-            "parameters": {
-                "fileName": "/data/output.txt",
-                "content": "Processed data"
-            },
-            "type": "n8n-nodes-base.writeBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                600,
-                0
-            ],
-            "id": "write-file",
-            "name": "Write File"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Read File",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Read File": {
-            "main": [
-                [
-                    {
-                        "node": "Parse CSV",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Parse CSV": {
-            "main": [
-                [
-                    {
-                        "node": "Write File",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read File": {
+      "main": [
+        [
+          {
+            "node": "Parse CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse CSV": {
+      "main": [
+        [
+          {
+            "node": "Generar Fichero Plano",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Fichero Plano": {
+      "main": [
+        [
+          {
+            "node": "Write File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "QsgJcIVxGhGc5gNp",
+  "meta": null,
+  "name": "07_Ficheros_Planos",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "file-ops",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "28465db1-24c4-58a3-8987-608308911950"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/input.csv"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "read-file",
+      "name": "Read File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "parse-csv",
+      "name": "Parse CSV"
+    },
+    {
+      "parameters": {
+        "fileName": "/data/output/output.txt",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        600,
+        0
+      ],
+      "id": "write-file",
+      "name": "Write File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convierte las filas del CSV en un fichero plano de ancho delimitado.\nconst items = $input.all();\nconst rows = items.map(i => i.json);\nconst headers = rows.length ? Object.keys(rows[0]) : [];\nconst lines = [headers.join(' | ')];\nlines.push('-'.repeat(lines[0].length));\nfor (const r of rows) lines.push(headers.map(h => String(r[h] ?? '')).join(' | '));\nlines.push('');\nlines.push(`Total de registros: ${rows.length}`);\nconst texto = lines.join('\\n');\n\nreturn [{\n  json: { registros: rows.length, columnas: headers, bytes: Buffer.byteLength(texto, 'utf8') },\n  binary: { data: { data: Buffer.from(texto, 'utf8').toString('base64'), mimeType: 'text/plain', fileName: 'output.txt' } }\n}];"
+      },
+      "id": "gen-txt-07",
+      "name": "Generar Fichero Plano",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📋 07_Ficheros_Planos\n\n**Qué hace**\nLee un CSV, lo parsea y genera un fichero de texto plano con las filas alineadas y el total de registros.\n\n**Entrada**\n`/data/input.csv` (en el equipo: `shared/input.csv`).\n\n**Salida**\n`/data/output/output.txt` + JSON con `registros`, `columnas` y `bytes`.\n\n**Requisitos para probarlo**\nEl CSV de entrada debe existir.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/file-ops\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "b7d5e03a-273e-4de5-9856-42c0ee3d7a6a"
 }

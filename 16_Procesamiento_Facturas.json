@@ -1,89 +1,154 @@
 {
-    "name": "16_Procesamiento_Facturas",
-    "nodes": [
-        {
-            "parameters": {
-                "pollTimes": {
-                    "item": [
-                        {
-                            "mode": "everyMinute"
-                        }
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.emailReadImap",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "email-trigger",
-            "name": "Email Trigger"
-        },
-        {
-            "parameters": {
-                "url": "https://api.ocr.com/parse",
-                "method": "POST",
-                "bodyParameters": {
-                    "parameters": [
-                        {
-                            "name": "file",
-                            "value": "={{$binary.data}}"
-                        }
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "ocr-api",
-            "name": "OCR API"
-        },
-        {
-            "parameters": {
-                "operation": "insert",
-                "schema": "public",
-                "table": "invoices",
-                "columns": "amount, date, vendor",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.postgres",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "save-invoice",
-            "name": "Save Invoice"
-        }
-    ],
-    "connections": {
-        "Email Trigger": {
-            "main": [
-                [
-                    {
-                        "node": "OCR API",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "OCR API": {
-            "main": [
-                [
-                    {
-                        "node": "Save Invoice",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Invoice File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Invoice File": {
+      "main": [
+        [
+          {
+            "node": "OCR API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR API": {
+      "main": [
+        [
+          {
+            "node": "Extraer Campos Factura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Campos Factura": {
+      "main": [
+        [
+          {
+            "node": "Save Invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "xtYRctwA4PAmKFXi",
+  "meta": null,
+  "name": "16_Procesamiento_Facturas",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "manual-trigger-invoice",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/factura_ejemplo.pdf"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "read-invoice",
+      "name": "Read Invoice File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://echo:8080/ocr",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        0
+      ],
+      "id": "ocr-api",
+      "name": "OCR API"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO invoices (amount, date, vendor) VALUES ($1, $2, $3) RETURNING id, amount, date, vendor;",
+        "options": {
+          "queryReplacement": "={{ $json.amount }},{{ $json.date }},{{ $json.vendor }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        880,
+        300
+      ],
+      "id": "save-invoice",
+      "name": "Save Invoice",
+      "credentials": {
+        "postgres": {
+          "id": "credPostgresLocal1",
+          "name": "Postgres local (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// El servicio OCR local (echo) confirma la subida; aqui se extraen los campos\n// de la factura. Con un OCR real se parsearia su respuesta en lugar de esto.\nconst respuesta = $input.first().json;\nreturn [{ json: {\n  amount: 1452.00,\n  date: new Date().toISOString().slice(0, 10),\n  vendor: 'Immersive Office S.L.',\n  ocr_ok: Boolean(respuesta),\n}}];"
+      },
+      "id": "ocr-map-16",
+      "name": "Extraer Campos Factura",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📋 16_Procesamiento_Facturas\n\n**Qué hace**\nLee el PDF de una factura, lo envia al servicio de OCR, extrae importe, fecha y proveedor, y lo guarda en PostgreSQL.\n\n**Entrada**\n`/data/factura_ejemplo.pdf` (generado como muestra).\n\n**Salida**\nFila nueva en la tabla `invoices`.\n\n**Requisitos para probarlo**\nPostgreSQL y `echo` levantados. Credencial **Postgres local**.\nEl nodo **Extraer Campos Factura** simula la salida del OCR: con un OCR real (ocr.space, Azure...) hay que parsear su respuesta ahi.\n\n**Cómo probarlo**\nPulsa **Execute workflow** y comprueba:\n`docker exec n8n_test_postgres psql -U n8n -d n8n_demo -c \"SELECT * FROM invoices;\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "326e7ef6-43d3-4c3d-a841-7164bcae5fd7"
 }

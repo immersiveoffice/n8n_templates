@@ -1,155 +1,195 @@
 {
-    "name": "22_Verificar_Crear_Lead",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "check-lead",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "operation": "executeQuery",
-                "query": "SELECT id FROM leads WHERE email = $1 AND document = $2 AND name = $3 AND surname = $4 LIMIT 1;",
-                "additionalFields": {
-                    "queryParams": "={{$json.email}},={{$json.document}},={{$json.name}},={{$json.surname}}"
-                }
-            },
-            "type": "n8n-nodes-base.postgres",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "check-exists",
-            "name": "Check Existence"
-        },
-        {
-            "parameters": {
-                "conditions": {
-                    "boolean": [
-                        {
-                            "value1": "={{$items().length > 0}}",
-                            "value2": true
-                        }
-                    ]
-                }
-            },
-            "type": "n8n-nodes-base.if",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "if-exists",
-            "name": "If Exists"
-        },
-        {
-            "parameters": {
-                "operation": "insert",
-                "schema": "public",
-                "table": "leads",
-                "columns": "name, surname, document, email",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.postgres",
-            "typeVersion": 1,
-            "position": [
-                600,
-                100
-            ],
-            "id": "create-lead",
-            "name": "Create Lead"
-        },
-        {
-            "parameters": {
-                "content": "Lead already exists",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                600,
-                -100
-            ],
-            "id": "respond-exists",
-            "name": "Respond Exists"
-        },
-        {
-            "parameters": {
-                "content": "Lead created successfully",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                800,
-                100
-            ],
-            "id": "respond-created",
-            "name": "Respond Created"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Check Existence",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Check Existence": {
-            "main": [
-                [
-                    {
-                        "node": "If Exists",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "If Exists": {
-            "main": [
-                [
-                    {
-                        "node": "Respond Exists",
-                        "type": "main",
-                        "index": 0
-                    }
-                ],
-                [
-                    {
-                        "node": "Create Lead",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Create Lead": {
-            "main": [
-                [
-                    {
-                        "node": "Respond Created",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Existence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Existence": {
+      "main": [
+        [
+          {
+            "node": "If Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Exists": {
+      "main": [
+        [
+          {
+            "node": "Respond Exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Lead": {
+      "main": [
+        [
+          {
+            "node": "Respond Created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "NSp6DdA9AKyF2Nis",
+  "meta": null,
+  "name": "22_Verificar_Crear_Lead",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "check-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "7d5c9c98-8957-5a9a-9df8-df7a7f0987c6"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM leads WHERE email = $1 AND document = $2 AND name = $3 AND surname = $4 LIMIT 1;",
+        "options": {
+          "queryReplacement": "={{ $json.query.email }},{{ $json.query.document }},{{ $json.query.name }},{{ $json.query.surname }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        200,
+        0
+      ],
+      "id": "check-exists",
+      "name": "Check Existence",
+      "credentials": {
+        "postgres": {
+          "id": "credPostgresLocal1",
+          "name": "Postgres local (pruebas)"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.id ? 1 : 0 }}",
+              "operation": "equal",
+              "value2": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "if-exists",
+      "name": "If Exists"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO leads (name, surname, document, email) VALUES ($1, $2, $3, $4) RETURNING id, name, surname, email;",
+        "options": {
+          "queryReplacement": "={{ $('Webhook').first().json.query.name }},{{ $('Webhook').first().json.query.surname }},{{ $('Webhook').first().json.query.document }},{{ $('Webhook').first().json.query.email }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        600,
+        100
+      ],
+      "id": "create-lead",
+      "name": "Create Lead",
+      "credentials": {
+        "postgres": {
+          "id": "credPostgresLocal1",
+          "name": "Postgres local (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { estado: 'ya_existe', id: $json.id } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        600,
+        -100
+      ],
+      "id": "respond-exists",
+      "name": "Respond Exists"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { estado: 'creado', lead: $json } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        800,
+        100
+      ],
+      "id": "respond-created",
+      "name": "Respond Created"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 22_Verificar_Crear_Lead\n\n**Qué hace**\nComprueba si un lead ya existe en la base de datos y, si no, lo crea. Responde de forma distinta en cada caso.\n\n**Entrada**\nGET con los parametros `email`, `document`, `name` y `surname`.\n\n**Salida**\nJSON `{estado: 'creado'|'ya_existe', ...}`.\n\n**Requisitos para probarlo**\nPostgreSQL levantado y credencial **Postgres local**. Tabla `leads`.\n\n**Cómo probarlo**\nLead nuevo:\n`curl \"http://localhost:5678/webhook/check-lead?email=nuevo@demo.es&document=99999999X&name=Pedro&surname=Ramos\"`\nLead repetido: repite la misma llamada.",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -220
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "fa352b09-5e80-4266-bbc4-e7f4bfb8893f"
 }

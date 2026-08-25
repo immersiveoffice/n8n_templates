@@ -1,96 +1,105 @@
 {
-    "name": "05_Gestion_Google_Calendar",
-    "nodes": [
-        {
-            "parameters": {
-                "pollTimes": {
-                    "item": [
-                        {
-                            "mode": "everyMinute"
-                        }
-                    ]
-                },
-                "calendar": {
-                    "__rl": true,
-                    "mode": "list",
-                    "value": "primary"
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.googleCalendarTrigger",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "gcal-trigger",
-            "name": "Google Calendar Trigger"
-        },
-        {
-            "parameters": {
-                "operation": "create",
-                "calendar": {
-                    "__rl": true,
-                    "mode": "list",
-                    "value": "primary"
-                },
-                "start": "2023-01-01T10:00:00",
-                "end": "2023-01-01T11:00:00",
-                "summary": "New Meeting",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.googleCalendar",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "gcal-create",
-            "name": "Create Event"
-        },
-        {
-            "parameters": {
-                "operation": "getAll",
-                "calendar": {
-                    "__rl": true,
-                    "mode": "list",
-                    "value": "primary"
-                },
-                "limit": 5,
-                "options": {}
-            },
-            "type": "n8n-nodes-base.googleCalendar",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "gcal-get-all",
-            "name": "Get Events"
-        }
-    ],
-    "connections": {
-        "Google Calendar Trigger": {
-            "main": [
-                [
-                    {
-                        "node": "Create Event",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Create Event": {
-            "main": [
-                [
-                    {
-                        "node": "Get Events",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event": {
+      "main": [
+        [
+          {
+            "node": "Get Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "IT5dcP4YcPqCey7c",
+  "meta": null,
+  "name": "05_Gestion_Google_Calendar",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "manual-trigger-gcal",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "mode": "list",
+          "value": "primary"
+        },
+        "start": "2026-08-25T10:00:00",
+        "end": "2026-08-25T11:00:00",
+        "summary": "Reunión de Formación Immersive Office",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "gcal-create",
+      "name": "Create Event"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "primary"
+        },
+        "limit": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        420,
+        0
+      ],
+      "id": "gcal-get",
+      "name": "Get Events"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 05_Gestion_Google_Calendar\n\n**Qué hace**\nCrea un evento en Google Calendar y despues lista los eventos proximos.\n\n**Entrada**\nTrigger manual; los datos del evento van en el nodo.\n\n**Salida**\nEvento creado y listado de eventos.\n\n**Requisitos para probarlo**\n**Credencial de Google Calendar (OAuth2).** No configurada.\nEn Google Cloud: crea un proyecto, activa la Calendar API, genera credenciales OAuth2 y anade la URL de retorno `http://localhost:5678/rest/oauth2-credential/callback`.\nDespues asignala a los dos nodos de Google Calendar.\n\n**Cómo probarlo**\nSin credencial no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "167aa87a-ae33-49b1-9656-798aa01fa945"
 }

@@ -1,74 +1,98 @@
 {
-    "name": "23_Recuperar_Ficheros_Sharepoint",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "get-sharepoint-file",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "resource": "file",
-                "operation": "download",
-                "fileId": "0123456789ABCDEF",
-                "siteId": "my-site-id"
-            },
-            "type": "n8n-nodes-base.microsoftSharePoint",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "sharepoint-download",
-            "name": "SharePoint Download"
-        },
-        {
-            "parameters": {
-                "fileName": "/data/downloaded_file.pdf",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.writeBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "save-file",
-            "name": "Save File"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "SharePoint Download",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "SharePoint Download": {
-            "main": [
-                [
-                    {
-                        "node": "Save File",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "SharePoint Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SharePoint Download": {
+      "main": [
+        [
+          {
+            "node": "Save File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "fogQ1fwex2CxtGcj",
+  "meta": null,
+  "name": "23_Recuperar_Ficheros_Sharepoint",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-sharepoint-file",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "0513778a-2bf0-5458-be5b-2d1e611f5554"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": "0123456789ABCDEF",
+        "siteId": "my-site-id"
+      },
+      "type": "n8n-nodes-base.microsoftSharePoint",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "sharepoint-download",
+      "name": "SharePoint Download"
+    },
+    {
+      "parameters": {
+        "fileName": "/data/downloaded_file.pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "save-file",
+      "name": "Save File"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 23_Recuperar_Ficheros_Sharepoint\n\n**Qué hace**\nDescarga un fichero de SharePoint y lo guarda en disco.\n\n**Entrada**\nGET con la referencia del fichero.\n\n**Salida**\n`/data/downloaded_file.pdf`.\n\n**Requisitos para probarlo**\n**Credencial de Microsoft SharePoint (OAuth2).** No configurada.\nAplicacion en Azure AD con permiso `Sites.Read.All`.\n\n**Cómo probarlo**\nSin credencial no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "732be7c4-2e1c-42bc-b9e4-7a5684540349"
 }

@@ -1,70 +1,94 @@
 {
-    "name": "17_Ticket_Soporte",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "create-ticket",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "projectKey": "SUP",
-                "summary": "={{$json.subject}}",
-                "description": "={{$json.description}}",
-                "additionalFields": {}
-            },
-            "type": "n8n-nodes-base.jira",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "jira-create",
-            "name": "Jira Create"
-        },
-        {
-            "parameters": {
-                "subject": "={{$json.subject}}",
-                "comment": {
-                    "body": "={{$json.description}}"
-                }
-            },
-            "type": "n8n-nodes-base.zendesk",
-            "typeVersion": 1,
-            "position": [
-                200,
-                200
-            ],
-            "id": "zendesk-create",
-            "name": "Zendesk Create"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Jira Create",
-                        "type": "main",
-                        "index": 0
-                    },
-                    {
-                        "node": "Zendesk Create",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Jira Create",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Zendesk Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "LTK5EKyiPQNEJEgl",
+  "meta": null,
+  "name": "17_Ticket_Soporte",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "create-ticket",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "d7f6bd7d-328a-54f5-8987-e19fa57bbca9"
+    },
+    {
+      "parameters": {
+        "projectKey": "SUP",
+        "summary": "={{$json.subject}}",
+        "description": "={{$json.description}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "jira-create",
+      "name": "Jira Create"
+    },
+    {
+      "parameters": {
+        "subject": "={{$json.subject}}",
+        "comment": {
+          "body": "={{$json.description}}"
+        }
+      },
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "id": "zendesk-create",
+      "name": "Zendesk Create"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 17_Ticket_Soporte\n\n**Qué hace**\nDa de alta la misma incidencia en Jira y en Zendesk.\n\n**Entrada**\nGET con los datos de la incidencia.\n\n**Salida**\nTicket creado en ambos sistemas.\n\n**Requisitos para probarlo**\n**Credencial de Jira** (dominio, correo y API token) y **credencial de Zendesk** (subdominio y API token).\nNinguna de las dos esta configurada.\n\n**Cómo probarlo**\nSin credenciales no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "94335bba-b0fa-4615-8b8c-e28c5289a049"
 }

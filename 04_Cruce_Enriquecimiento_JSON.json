@@ -1,0 +1,186 @@
+{
+  "active": false,
+  "connections": {
+    "Al pulsar 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Leer Clientes JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Leer Clientes JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Clientes JSON": {
+      "main": [
+        [
+          {
+            "node": "Leer Pedidos JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Pedidos JSON": {
+      "main": [
+        [
+          {
+            "node": "Cruzar y Enriquecer JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cruzar y Enriquecer JSON": {
+      "main": [
+        [
+          {
+            "node": "Devolver JSON Enriquecido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "VCpmR717kbGVKU7D",
+  "meta": null,
+  "name": "04_Cruce_Enriquecimiento_JSON",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -100
+      ],
+      "id": "manual-trigger-4",
+      "name": "Al pulsar 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "path": "merge-datasets",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        150
+      ],
+      "id": "webhook-merge",
+      "name": "Webhook Trigger",
+      "webhookId": "merge-datasets-hook"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/input/clientes.json",
+        "dataPropertyName": "clientes"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -20
+      ],
+      "id": "read-clients-file",
+      "name": "Leer Clientes JSON",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/input/pedidos.json",
+        "dataPropertyName": "pedidos"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        180
+      ],
+      "id": "read-orders-file",
+      "name": "Leer Pedidos JSON",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================================================\n// Immersive Office - Cruce y Enriquecimiento de Datasets JSON (Join + Agg)\n// ==========================================================================\nlet clients = [];\nlet orders = [];\n\n// Los binarios se guardan en disco (modo filesystem), asi que hay que pedir\n// el buffer real con getBinaryDataBuffer en vez de leer binary.<prop>.data.\ntry {\n  const buf = await this.helpers.getBinaryDataBuffer(0, 'clientes');\n  if (buf && buf.length) clients = JSON.parse(buf.toString('utf8'));\n} catch (e) {}\n\ntry {\n  const buf = await this.helpers.getBinaryDataBuffer(0, 'pedidos');\n  if (buf && buf.length) orders = JSON.parse(buf.toString('utf8'));\n} catch (e) {}\n\n// Si no se cargaron de disco, usar datasets de prueba completos para tests\nif (!clients.length) {\n  clients = [\n    { id_cliente: \"CLI-001\", nombre: \"Ana García Morales\", email: \"ana.garcia@techcorp.es\", pais: \"España\", categoria: \"Premium\" },\n    { id_cliente: \"CLI-002\", nombre: \"Carlos Mendoza Ruiz\", email: \"carlos.mendoza@innovacion.com\", pais: \"México\", categoria: \"Estándar\" },\n    { id_cliente: \"CLI-003\", nombre: \"Lucía Fernández Torres\", email: \"lucia.fernandez@globaldev.io\", pais: \"Argentina\", categoria: \"VIP\" },\n    { id_cliente: \"CLI-004\", nombre: \"David Silva Romero\", email: \"david.silva@datacenter.net\", pais: \"Colombia\", categoria: \"Estándar\" }\n  ];\n}\n\nif (!orders.length) {\n  orders = [\n    { id_pedido: \"ORD-101\", id_cliente: \"CLI-001\", producto: \"Suscripción Inmersiva Anual\", unidades: 2, precio_unitario: 249.99, estado: \"Completado\" },\n    { id_pedido: \"ORD-102\", id_cliente: \"CLI-001\", producto: \"Formación Automatizaciones n8n\", unidades: 1, precio_unitario: 450.00, estado: \"Completado\" },\n    { id_pedido: \"ORD-103\", id_cliente: \"CLI-002\", producto: \"Consultoría IA Local\", unidades: 5, precio_unitario: 120.00, estado: \"Pendiente\" },\n    { id_pedido: \"ORD-104\", id_cliente: \"CLI-003\", producto: \"Pack Plantillas Flujos Pro\", unidades: 1, precio_unitario: 199.00, estado: \"Completado\" },\n    { id_pedido: \"ORD-105\", id_cliente: \"CLI-003\", producto: \"Suscripción Inmersiva Anual\", unidades: 3, precio_unitario: 249.99, estado: \"Completado\" }\n  ];\n}\n\n// Indexar pedidos por id_cliente\nconst ordersByClient = {};\nfor (const order of orders) {\n  const cid = order.id_cliente;\n  if (!ordersByClient[cid]) {\n    ordersByClient[cid] = [];\n  }\n  ordersByClient[cid].push(order);\n}\n\n// Cruzar clientes con sus pedidos y calcular métricas agregadas\nconst enrichedClients = clients.map(client => {\n  const clientOrders = ordersByClient[client.id_cliente] || [];\n  \n  const totalGasto = clientOrders.reduce((sum, ord) => sum + (ord.unidades * ord.precio_unitario), 0);\n  const totalItems = clientOrders.reduce((sum, ord) => sum + ord.unidades, 0);\n  const productosUnicos = [...new Set(clientOrders.map(ord => ord.producto))];\n\n  // Segmentación automática de valor (LTV)\n  let segmento = \"Ocasional\";\n  if (totalGasto > 800) segmento = \"VIP Platinum\";\n  else if (totalGasto > 400) segmento = \"Gold\";\n  else if (totalGasto > 100) segmento = \"Silver\";\n\n  return {\n    json: {\n      id_cliente: client.id_cliente,\n      nombre: client.nombre,\n      email: client.email,\n      pais: client.pais,\n      segmento_calculado: segmento,\n      resumen_compras: {\n        num_pedidos: clientOrders.length,\n        total_articulos: totalItems,\n        gasto_acumulado_eur: Number(totalGasto.toFixed(2)),\n        productos_adquiridos: productosUnicos\n      },\n      detalle_pedidos: clientOrders\n    }\n  };\n});\n\nreturn enrichedClients;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        80
+      ],
+      "id": "cross-json-code",
+      "name": "Cruzar y Enriquecer JSON"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        360,
+        80
+      ],
+      "id": "respond-merge-webhook",
+      "name": "Devolver JSON Enriquecido",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### 🔄 Formación Immersive Office: Cruce y Enriquecimiento de Datos JSON\n\n**Objetivo:** Realizar un *Join* relacional entre dos archivos JSON independientes (`clientes.json` y `pedidos.json`), agrupando pedidos y calculando métricas de negocio (LTV, segmento VIP, total gastado).\n\n#### 🧪 Cómo hacer pruebas:\n\n**1. Modo 1 Clic (Directo en n8n):**\nHaz clic en el botón inferior **\"Test workflow\"** (o ejecuta el nodo *\"Al pulsar 'Test workflow'\"*). Leerá los dos ficheros JSON y cruzará todos los registros al instante.\n\n**2. Modo Webhook (cURL):**\n```bash\ncurl -X POST http://localhost:5678/webhook-test/merge-datasets\n```\n\n📖 **Tutorial completo:** [immersiveoffice.online](https://immersiveoffice.online)",
+        "height": 420,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -550
+      ],
+      "id": "sticky-guide-4",
+      "name": "Guía del Flujo"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 04_Cruce_Enriquecimiento_JSON\n\n**Qué hace**\nCruza clientes con sus pedidos, calcula gasto acumulado y numero de pedidos, y segmenta cada cliente por valor (Ocasional / Silver / Gold / VIP Platinum).\n\n**Entrada**\n`/data/input/clientes.json` y `/data/input/pedidos.json`.\n\n**Salida**\nJSON con cada cliente enriquecido: `segmento_calculado`, `resumen_compras` y `detalle_pedidos`.\n\n**Requisitos para probarlo**\nAmbos JSON deben existir. No hace falta nada mas.\n\n**Cómo probarlo**\nPulsa **Execute workflow**, o bien:\n`curl \"http://localhost:5678/webhook/merge-datasets\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        -220
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "18f91bb2-6472-4a69-a373-957d98d92624"
+}

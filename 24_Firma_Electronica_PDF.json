@@ -1,118 +1,142 @@
 {
-    "name": "24_Firma_Electronica_PDF",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "sign-pdf",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "fileSelector": "/data/contract.pdf"
-            },
-            "type": "n8n-nodes-base.readBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "read-pdf",
-            "name": "Read PDF"
-        },
-        {
-            "parameters": {
-                "url": "https://api.pdf.co/v1/pdf/edit/add",
-                "method": "POST",
-                "authentication": "headerAuth",
-                "headerParameters": {
-                    "parameters": [
-                        {
-                            "name": "x-api-key",
-                            "value": "YOUR_API_KEY"
-                        }
-                    ]
-                },
-                "bodyParameters": {
-                    "parameters": [
-                        {
-                            "name": "images",
-                            "value": "[{ \"url\": \"https://example.com/signature.png\", \"x\": 100, \"y\": 100, \"pages\": \"0\" }]"
-                        },
-                        {
-                            "name": "file",
-                            "value": "={{$binary.data}}"
-                        }
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "sign-api",
-            "name": "Sign PDF (API)"
-        },
-        {
-            "parameters": {
-                "fileName": "/data/signed_contract.pdf",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.writeBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                600,
-                0
-            ],
-            "id": "save-signed-pdf",
-            "name": "Save Signed PDF"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Read PDF",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Read PDF": {
-            "main": [
-                [
-                    {
-                        "node": "Sign PDF (API)",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Sign PDF (API)": {
-            "main": [
-                [
-                    {
-                        "node": "Save Signed PDF",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read PDF": {
+      "main": [
+        [
+          {
+            "node": "Sign PDF (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sign PDF (API)": {
+      "main": [
+        [
+          {
+            "node": "Save Signed PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "4AGkyHGRb87g5nXR",
+  "meta": null,
+  "name": "24_Firma_Electronica_PDF",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "sign-pdf",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "64856079-e4a6-511d-bf26-50011093dbeb"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/contract.pdf"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "read-pdf",
+      "name": "Read PDF"
+    },
+    {
+      "parameters": {
+        "url": "https://api.pdf.co/v1/pdf/edit/add",
+        "method": "POST",
+        "authentication": "headerAuth",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "YOUR_API_KEY"
+            }
+          ]
+        },
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "images",
+              "value": "[{ \"url\": \"https://example.com/signature.png\", \"x\": 100, \"y\": 100, \"pages\": \"0\" }]"
+            },
+            {
+              "name": "file",
+              "value": "={{$binary.data}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "sign-api",
+      "name": "Sign PDF (API)"
+    },
+    {
+      "parameters": {
+        "fileName": "/data/signed_contract.pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        600,
+        0
+      ],
+      "id": "save-signed-pdf",
+      "name": "Save Signed PDF"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 24_Firma_Electronica_PDF\n\n**Qué hace**\nLee un PDF, lo manda a un servicio de firma electronica y guarda el documento firmado.\n\n**Entrada**\n`/data/contract.pdf` (generado como muestra).\n\n**Salida**\n`/data/signed_contract.pdf`.\n\n**Requisitos para probarlo**\n**API key de pdf.co** (u otro servicio de firma). No configurada: el nodo lleva el marcador `YOUR_API_KEY`.\nEl PDF de entrada SI existe y el flujo lo lee bien.\n\n**Cómo probarlo**\nSin API key no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "6de39355-d5d3-4856-aef6-6b6153a6ca31"
 }

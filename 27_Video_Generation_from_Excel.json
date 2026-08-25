@@ -1,0 +1,259 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Read Excel File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Excel File": {
+      "main": [
+        [
+          {
+            "node": "Spreadsheet File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Spreadsheet File": {
+      "main": [
+        [
+          {
+            "node": "Loop Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Rows": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Construir Prompt ComfyUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construir Prompt ComfyUI": {
+      "main": [
+        [
+          {
+            "node": "Enviar a ComfyUI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar a ComfyUI": {
+      "main": [
+        [
+          {
+            "node": "Esperar y Extraer Fichero",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Imagen": {
+      "main": [
+        [
+          {
+            "node": "Guardar Imagen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Imagen": {
+      "main": [
+        [
+          {
+            "node": "Loop Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esperar y Extraer Fichero": {
+      "main": [
+        [
+          {
+            "node": "Descargar Imagen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "qXEQClwh06mh5nJG",
+  "name": "27_Video Generation from Excel",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "t27",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "/data/input/videos.xlsx"
+      },
+      "id": "r27",
+      "name": "Read Excel File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "s27",
+      "name": "Spreadsheet File",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "l27",
+      "name": "Loop Rows",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Construye el grafo de ComfyUI (SDXL txt2img) a partir de la fila del Excel.\n// ComfyUI de este equipo solo tiene checkpoints de IMAGEN (SDXL); no hay\n// modelo de video instalado, por eso esta fase genera imagenes.\nconst fila = $input.first().json;\nconst positivo = fila.prompt || fila.Prompt || 'modern immersive office, cinematic lighting';\nconst negativo = fila.negative_prompt || fila.Negative_prompt || 'blurry, low quality, watermark, text';\nconst titulo = String(fila.title || fila.Title || `escena_${$runIndex}`).replace(/[^a-zA-Z0-9_-]/g, '_');\n\nconst grafo = {\n  \"4\": { class_type: \"CheckpointLoaderSimple\", inputs: { ckpt_name: \"sd_xl_base_1.0.safetensors\" } },\n  \"5\": { class_type: \"EmptyLatentImage\", inputs: { width: 1024, height: 1024, batch_size: 1 } },\n  \"6\": { class_type: \"CLIPTextEncode\", inputs: { text: positivo, clip: [\"4\", 1] } },\n  \"7\": { class_type: \"CLIPTextEncode\", inputs: { text: negativo, clip: [\"4\", 1] } },\n  \"3\": { class_type: \"KSampler\", inputs: {\n           seed: Math.floor(Math.random() * 1e12), steps: 25, cfg: 7,\n           sampler_name: \"euler\", scheduler: \"normal\", denoise: 1,\n           model: [\"4\", 0], positive: [\"6\", 0], negative: [\"7\", 0], latent_image: [\"5\", 0] } },\n  \"8\": { class_type: \"VAEDecode\", inputs: { samples: [\"3\", 0], vae: [\"4\", 2] } },\n  \"9\": { class_type: \"SaveImage\", inputs: { filename_prefix: `n8n_${titulo}`, images: [\"8\", 0] } },\n};\nreturn [{ json: { titulo, positivo, negativo, payload: { prompt: grafo, client_id: 'n8n' } } }];"
+      },
+      "id": "p27",
+      "name": "Construir Prompt ComfyUI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8188/prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "options": {}
+      },
+      "id": "c27",
+      "name": "Enviar a ComfyUI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sondea ComfyUI hasta que el trabajo termina. Una espera fija no sirve:\n// el tiempo de render depende del modelo, la resolucion y la carga de la GPU.\nconst promptId = $('Enviar a ComfyUI').first().json.prompt_id;\nconst base = 'http://host.docker.internal:8188';\nconst maxIntentos = 150;      // 150 x 4 s = 10 min de margen\nconst esperaMs = 4000;\n\nlet salida = null;\nfor (let intento = 0; intento < maxIntentos; intento++) {\n  const historial = await this.helpers.httpRequest({\n    method: 'GET', url: `${base}/history/${promptId}`, json: true,\n  });\n  const entrada = historial && historial[promptId];\n  if (entrada && entrada.outputs && Object.keys(entrada.outputs).length) {\n    salida = entrada;\n    break;\n  }\n  const estado = entrada && entrada.status;\n  if (estado && estado.status_str === 'error') {\n    throw new Error(`ComfyUI fallo el trabajo ${promptId}: ${JSON.stringify(estado.messages || [])}`);\n  }\n  await new Promise(r => setTimeout(r, esperaMs));\n}\nif (!salida) {\n  throw new Error(`ComfyUI no termino el trabajo ${promptId} en ${(maxIntentos * esperaMs) / 1000} s.`);\n}\n\nconst imagenes = Object.values(salida.outputs).flatMap(o => o.images || []);\nif (!imagenes.length) throw new Error('ComfyUI no devolvio ninguna imagen.');\n\nconst img = imagenes[0];\nreturn [{ json: {\n  titulo: $('Construir Prompt ComfyUI').first().json.titulo,\n  filename: img.filename, subfolder: img.subfolder || '', type: img.type || 'output',\n}}];"
+      },
+      "id": "e27",
+      "name": "Esperar y Extraer Fichero",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'http://host.docker.internal:8188/view?filename=' + encodeURIComponent($json.filename) + '&subfolder=' + encodeURIComponent($json.subfolder) + '&type=' + $json.type }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "d27",
+      "name": "Descargar Imagen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1720,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "=/data/pendiente_de_revision/{{ $json.titulo }}.png",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "g27",
+      "name": "Guardar Imagen",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📋 27_Video Generation from Excel\n\n**Qué hace**\nRecorre las filas de un Excel y genera una imagen por fila con ComfyUI (SDXL, 1024x1024), guardandola para revision.\n\n**Entrada**\n`/data/input/videos.xlsx` con las columnas `title`, `prompt` y `negative_prompt`.\n\n**Salida**\n`/data/pendiente_de_revision/<title>.png` por cada fila.\n\n**Requisitos para probarlo**\nComfyUI del equipo accesible desde el contenedor (regla de ufw para el puerto 8188). YA CONFIGURADO.\n\nIMPORTANTE: este ComfyUI solo tiene checkpoints de IMAGEN (SDXL). No hay ningun modelo de video instalado (SVD, Hunyuan, LTXV...), asi que la fase de video no se puede ejecutar; el flujo genera imagenes. Para video habria que descargar un checkpoint de video y rehacer el grafo.\n\nEl nodo **Esperar y Extraer Fichero** sondea `/history` cada 4 s (hasta 10 min) en vez de esperar un tiempo fijo: el render tarda lo que tarde segun modelo, resolucion y carga de GPU.\n\n**Cómo probarlo**\nPulsa **Execute workflow**. Probado: 2 filas, 2 PNG de 1024x1024.",
+        "height": 640,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        180
+      ]
+    }
+  ],
+  "settings": {},
+  "pinData": {},
+  "tags": []
+}

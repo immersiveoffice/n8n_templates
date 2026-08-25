@@ -1,4 +1,33 @@
 {
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Email": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "IIuIKF5C47dLycJ1",
+  "meta": {
+    "instanceId": "db5046136ee13ec96ef47271dd62188ada976dccb9830325785241b4a26e5acf"
+  },
   "name": "03_Validacion_Email",
   "nodes": [
     {
@@ -57,41 +86,28 @@
       "typeVersion": 1,
       "id": "2d0a789e-f993-4abd-9175-e5e43d0f5537",
       "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 03_Validacion_Email\n\n**Qué hace**\nValida el formato de una direccion de correo con expresion regular.\n\n**Entrada**\nGET con el parametro `email`.\n\n**Salida**\nJSON con `email`, `isValid` y `message`.\n\n**Requisitos para probarlo**\nNinguno. Es autocontenido.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/validate-email?email=ana.garcia@techcorp.es\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
     }
   ],
   "pinData": {},
-  "connections": {
-    "Webhook": {
-      "main": [
-        [
-          {
-            "node": "Validate Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Validate Email": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
-  },
-  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "cb55a4eb-e0b8-4ad2-b7aa-1cc954fdb50e",
-  "meta": {
-    "instanceId": "db5046136ee13ec96ef47271dd62188ada976dccb9830325785241b4a26e5acf"
-  },
-  "id": "IIuIKF5C47dLycJ1",
-  "tags": []
+  "tags": [],
+  "versionId": "d3f9df2c-011f-40a8-bc0f-39f7418ebc61"
 }

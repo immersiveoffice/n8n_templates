@@ -1,64 +1,88 @@
 {
-    "name": "13_Publicacion_Redes_Sociales",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "post-social",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "text": "={{$json.content}}"
-            },
-            "type": "n8n-nodes-base.twitter",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "twitter-post",
-            "name": "Twitter Post"
-        },
-        {
-            "parameters": {
-                "text": "={{$json.content}}"
-            },
-            "type": "n8n-nodes-base.linkedin",
-            "typeVersion": 1,
-            "position": [
-                200,
-                200
-            ],
-            "id": "linkedin-post",
-            "name": "LinkedIn Post"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Twitter Post",
-                        "type": "main",
-                        "index": 0
-                    },
-                    {
-                        "node": "LinkedIn Post",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Twitter Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LinkedIn Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "I4iMJp0m4kipdJYN",
+  "meta": null,
+  "name": "13_Publicacion_Redes_Sociales",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "post-social",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "e2eafdcf-51c7-55af-816a-8b136897c016"
+    },
+    {
+      "parameters": {
+        "text": "={{$json.content}}"
+      },
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "twitter-post",
+      "name": "Twitter Post"
+    },
+    {
+      "parameters": {
+        "text": "={{$json.content}}"
+      },
+      "type": "n8n-nodes-base.linkedin",
+      "typeVersion": 1,
+      "position": [
+        200,
+        200
+      ],
+      "id": "linkedin-post",
+      "name": "LinkedIn Post"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 13_Publicacion_Redes_Sociales\n\n**Qué hace**\nPublica el mismo contenido en Twitter/X y en LinkedIn.\n\n**Entrada**\nGET con el texto a publicar.\n\n**Salida**\nPublicacion creada en ambas redes.\n\n**Requisitos para probarlo**\n**Credencial OAuth de Twitter/X** (cuenta de desarrollador con permiso de escritura) y **credencial OAuth2 de LinkedIn**.\nNinguna de las dos esta configurada.\n\n**Cómo probarlo**\nSin credenciales no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "a07b2bac-a916-4329-a709-20e39652cac6"
 }

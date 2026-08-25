@@ -1,94 +1,112 @@
 {
-    "name": "12_Enriquecimiento_Leads",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "enrich-lead",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "url": "https://api.clearbit.com/v2/combined/find",
-                "method": "GET",
-                "authentication": "headerAuth",
-                "headerParameters": {
-                    "parameters": [
-                        {
-                            "name": "Authorization",
-                            "value": "Bearer KEY"
-                        }
-                    ]
-                },
-                "queryParameters": {
-                    "parameters": [
-                        {
-                            "name": "email",
-                            "value": "={{$json.email}}"
-                        }
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "enrich-api",
-            "name": "Enrichment API"
-        },
-        {
-            "parameters": {
-                "mode": "mergeByPosition"
-            },
-            "type": "n8n-nodes-base.merge",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "merge-data",
-            "name": "Merge Data"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Enrichment API",
-                        "type": "main",
-                        "index": 0
-                    },
-                    {
-                        "node": "Merge Data",
-                        "type": "main",
-                        "index": 1
-                    }
-                ]
-            ]
-        },
-        "Enrichment API": {
-            "main": [
-                [
-                    {
-                        "node": "Merge Data",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Enrichment API",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Enrichment API": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "GEUzadAqgFkNXkMz",
+  "meta": null,
+  "name": "12_Enriquecimiento_Leads",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "enrich-lead",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "203d57f2-c573-59a4-91ef-761f40079a66"
+    },
+    {
+      "parameters": {
+        "url": "http://echo:8080/enrich",
+        "method": "GET",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.query.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "id": "enrich-api",
+      "name": "Enrichment API"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        400,
+        0
+      ],
+      "id": "merge-data",
+      "name": "Merge Data"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 12_Enriquecimiento_Leads\n\n**Qué hace**\nLlama a un servicio de enriquecimiento con el email del lead y combina la respuesta con los datos originales.\n\n**Entrada**\nGET con el parametro `email` (y los que quieras anadir).\n\n**Salida**\nJSON combinado: datos del lead + datos del servicio de enriquecimiento.\n\n**Requisitos para probarlo**\nServicio `echo` levantado, que hace de sustituto local.\nPara usar Clearbit de verdad: cambia la URL a `https://api.clearbit.com/v2/combined/find` y anade una credencial Header Auth con tu API key.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/enrich-lead?email=ana.garcia@techcorp.es\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "6c8c8153-3783-43a2-8b08-8ce1c8876b44"
 }

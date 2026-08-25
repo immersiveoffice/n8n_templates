@@ -1,71 +1,102 @@
 {
-    "name": "25_Prestashop_Pedidos",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "list-orders",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "operation": "executeQuery",
-                "query": "SELECT id_order, reference, total_paid, date_add, payment, current_state FROM ps_orders ORDER BY date_add DESC LIMIT 50;"
-            },
-            "type": "n8n-nodes-base.mySql",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "mysql-query",
-            "name": "Get Orders"
-        },
-        {
-            "parameters": {
-                "options": {}
-            },
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "respond-webhook",
-            "name": "Respond to Webhook"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Get Orders",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Get Orders": {
-            "main": [
-                [
-                    {
-                        "node": "Respond to Webhook",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Orders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Orders": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "ry1qus33Bf9evF3X",
+  "meta": null,
+  "name": "25_Prestashop_Pedidos",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "list-orders",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "fb499a71-b902-5886-8abf-d91093afaa6f"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id_order, reference, total_paid, date_add, payment, current_state FROM ps_orders ORDER BY date_add DESC LIMIT 50;"
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "mysql-query",
+      "name": "Get Orders",
+      "credentials": {
+        "mySql": {
+          "id": "credMySqlLocal001",
+          "name": "MySQL local Prestashop (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "respond-webhook",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 25_Prestashop_Pedidos\n\n**Qué hace**\nDevuelve los ultimos 50 pedidos de la base de datos de Prestashop.\n\n**Entrada**\nNinguna. La consulta va fija en el nodo.\n\n**Salida**\nJSON con la lista de pedidos (referencia, importe, fecha, forma de pago, estado).\n\n**Requisitos para probarlo**\nContenedor `n8n_test_mariadb` levantado y credencial **MySQL local Prestashop**.\nTabla `ps_orders` con datos de muestra.\nPara la tienda real: cambia la credencial a la de tu Prestashop.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/list-orders\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "87b4c7cf-39fd-4575-8fea-9fa8e4cb4e76"
 }

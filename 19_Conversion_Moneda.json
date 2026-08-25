@@ -1,71 +1,95 @@
 {
-    "name": "19_Conversion_Moneda",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "convert-currency",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "url": "https://api.exchangerate-api.com/v4/latest/USD",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "get-rates",
-            "name": "Get Rates"
-        },
-        {
-            "parameters": {
-                "jsCode": "// Convert amount from input using fetched rates\n// Input: { \"amount\": 100, \"target\": \"EUR\" }\nconst amount = $input.all()[0].json.amount || 0;\nconst target = $input.all()[0].json.target || \"EUR\";\nconst rates = $input.all()[0].json.rates;\n\nconst rate = rates[target];\nconst converted = amount * rate;\n\nreturn {\n  json: {\n    amount,\n    target,\n    rate,\n    converted\n  }\n};"
-            },
-            "type": "n8n-nodes-base.code",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "calculate",
-            "name": "Calculate"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Get Rates",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Get Rates": {
-            "main": [
-                [
-                    {
-                        "node": "Calculate",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Rates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Rates": {
+      "main": [
+        [
+          {
+            "node": "Calculate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "6lhU77rvTpwaQza5",
+  "meta": null,
+  "name": "19_Conversion_Moneda",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "convert-currency",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "6e6a1d10-2282-5157-aa98-8d66293b9a23"
+    },
+    {
+      "parameters": {
+        "url": "https://api.exchangerate-api.com/v4/latest/USD",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "get-rates",
+      "name": "Get Rates"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Los importes llegan por el webhook; las tasas por el nodo anterior.\nconst w = $('Webhook').first().json;\nconst has = (o) => o && typeof o === 'object' && Object.keys(o).length > 0;\nconst src = has(w.query) ? w.query : (has(w.body) ? w.body : w);\n\nconst amount = Number(src.amount) || 0;\nconst target = String(src.target || 'EUR').toUpperCase();\nconst rates = $input.first().json.rates || {};\nconst rate = rates[target];\n\nif (rate === undefined) {\n  return [{ json: { error: `Divisa no soportada: ${target}`, divisas: Object.keys(rates).slice(0, 20) } }];\n}\nreturn [{ json: {\n  base: $input.first().json.base || 'USD',\n  amount, target, rate,\n  converted: Number((amount * rate).toFixed(2)),\n  fecha_tasas: $input.first().json.date || null\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "calculate",
+      "name": "Calculate"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 19_Conversion_Moneda\n\n**Qué hace**\nConsulta las tasas de cambio del dia y convierte un importe a la divisa que le pidas.\n\n**Entrada**\nGET con los parametros `amount` y `target` (por ejemplo EUR, GBP, JPY).\n\n**Salida**\nJSON con `rate`, `converted` y `fecha_tasas`.\n\n**Requisitos para probarlo**\nSalida a internet desde el contenedor (usa la API publica y gratuita exchangerate-api.com, sin clave).\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/convert-currency?amount=100&target=EUR\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "e173e2d1-7b1a-41f6-a275-70b6cc9155b5"
 }

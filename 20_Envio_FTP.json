@@ -1,72 +1,104 @@
 {
-    "name": "20_Envio_FTP",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "ftp-upload",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "fileSelector": "/data/file.txt"
-            },
-            "type": "n8n-nodes-base.readBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "read-file",
-            "name": "Read File"
-        },
-        {
-            "parameters": {
-                "operation": "upload",
-                "path": "/remote/path/file.txt",
-                "binaryPropertyName": "data"
-            },
-            "type": "n8n-nodes-base.ftp",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "ftp-upload",
-            "name": "FTP Upload"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Read File",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Read File": {
-            "main": [
-                [
-                    {
-                        "node": "FTP Upload",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read File": {
+      "main": [
+        [
+          {
+            "node": "FTP Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "MJpCx7NsXdeorRKp",
+  "meta": null,
+  "name": "20_Envio_FTP",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "ftp-upload",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "5fa8c37d-7a6e-5296-bfea-59756350b747"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/file.txt"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "read-file",
+      "name": "Read File"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "path": "=uploads/file_{{ $now.toMillis() }}.txt",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.ftp",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "ftp-upload",
+      "name": "FTP Upload",
+      "credentials": {
+        "ftp": {
+          "id": "credFtpLocal00001",
+          "name": "FTP local (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 📋 20_Envio_FTP\n\n**Qué hace**\nLee un fichero del disco y lo sube por FTP con nombre unico.\n\n**Entrada**\n`/data/file.txt`.\n\n**Salida**\nFichero en el servidor FTP, en `uploads/file_<timestamp>.txt`.\n\n**Requisitos para probarlo**\nContenedor `n8n_test_ftp` levantado y credencial **FTP local (pruebas)**.\nLa ruta es RELATIVA al directorio de login: el usuario no esta enjaulado, asi que una ruta absoluta apuntaria a la raiz real del servidor.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/ftp-upload\"`\nComprobar: `docker exec n8n_test_ftp ls -la /ftp/n8n/uploads`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "4db8294c-bac4-4276-b2f3-1519fe5d9074"
 }

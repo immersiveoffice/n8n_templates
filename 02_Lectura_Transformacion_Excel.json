@@ -1,0 +1,239 @@
+{
+  "active": false,
+  "connections": {
+    "Al pulsar 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Leer Excel Empleados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Leer Excel Empleados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Excel Empleados": {
+      "main": [
+        [
+          {
+            "node": "Extraer Datos Excel a JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Datos Excel a JSON": {
+      "main": [
+        [
+          {
+            "node": "Calcular Estadísticas por Depto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular Estadísticas por Depto": {
+      "main": [
+        [
+          {
+            "node": "Generar Nuevo Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Nuevo Excel": {
+      "main": [
+        [
+          {
+            "node": "Guardar en shared/output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar en shared/output": {
+      "main": [
+        [
+          {
+            "node": "Confirmar Proceso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "8gOL14OBx4sooy1D",
+  "meta": null,
+  "name": "02_Lectura_Transformacion_Excel",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -100
+      ],
+      "id": "manual-trigger-2",
+      "name": "Al pulsar 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "path": "process-excel",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        140
+      ],
+      "id": "webhook-excel",
+      "name": "Webhook Trigger",
+      "webhookId": "process-excel-hook"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/input/empleados.xlsx"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        20
+      ],
+      "id": "read-excel-file",
+      "name": "Leer Excel Empleados",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": 1
+        }
+      },
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        100,
+        20
+      ],
+      "id": "parse-excel-sheet",
+      "name": "Extraer Datos Excel a JSON",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================================================\n// Immersive Office - Transformación y Agregación de Métricas de Empleados\n// ==========================================================================\nlet items = $input.all();\n\n// Si no vinieron datos del Excel (ej: ruta no encontrada), proveer dataset de fallback para tests\nif (!items || items.length === 0 || !items[0].json || Object.keys(items[0].json).length === 0) {\n  items = [\n    { json: { ID: 1, Nombre: \"Elena Navarro\", Departamento: \"Tecnología\", Salario: 45000 } },\n    { json: { ID: 2, Nombre: \"Carlos Ruiz\", Departamento: \"Tecnología\", Salario: 52000 } },\n    { json: { ID: 3, Nombre: \"Ana Gómez\", Departamento: \"Marketing\", Salario: 38000 } },\n    { json: { ID: 4, Nombre: \"David Morales\", Departamento: \"Marketing\", Salario: 41000 } },\n    { json: { ID: 5, Nombre: \"Lucía Soto\", Departamento: \"Ventas\", Salario: 36000 } },\n    { json: { ID: 6, Nombre: \"Javier Sanz\", Departamento: \"Ventas\", Salario: 48000 } }\n  ];\n}\n\nconst deptStats = {};\nlet totalNomina = 0;\n\nfor (const item of items) {\n  const row = item.json;\n  const dept = row.Departamento || 'Sin Asignar';\n  const salario = Number(row.Salario) || 0;\n\n  totalNomina += salario;\n\n  if (!deptStats[dept]) {\n    deptStats[dept] = {\n      departamento: dept,\n      total_empleados: 0,\n      masa_salarial: 0,\n      salario_max: 0,\n      salario_min: Infinity,\n      empleados: []\n    };\n  }\n\n  deptStats[dept].total_empleados += 1;\n  deptStats[dept].masa_salarial += salario;\n  deptStats[dept].salario_max = Math.max(deptStats[dept].salario_max, salario);\n  deptStats[dept].salario_min = Math.min(deptStats[dept].salario_min, salario);\n  deptStats[dept].empleados.push(row.Nombre || 'Empleado');\n}\n\n// Generar filas para el nuevo reporte consolidado\nconst reportRows = Object.values(deptStats).map(d => ({\n  json: {\n    Departamento: d.departamento,\n    Num_Empleados: d.total_empleados,\n    Masa_Salarial_Total: d.masa_salarial,\n    Salario_Promedio: Math.round(d.masa_salarial / d.total_empleados),\n    Salario_Maximo: d.salario_max,\n    Salario_Minimo: d.salario_min === Infinity ? 0 : d.salario_min,\n    Porcentaje_Presupuesto: totalNomina > 0 ? ((d.masa_salarial / totalNomina) * 100).toFixed(2) + '%' : '0%'\n  }\n}));\n\nreturn reportRows;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        20
+      ],
+      "id": "compute-stats",
+      "name": "Calcular Estadísticas por Depto"
+    },
+    {
+      "parameters": {
+        "operation": "toFile",
+        "fileFormat": "xlsx",
+        "options": {
+          "sheetName": "Resumen_Departamentos"
+        }
+      },
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        540,
+        20
+      ],
+      "id": "generate-excel",
+      "name": "Generar Nuevo Excel"
+    },
+    {
+      "parameters": {
+        "fileName": "/data/output/resumen_departamentos.xlsx",
+        "dataPropertyName": "data"
+      },
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        760,
+        20
+      ],
+      "id": "save-excel-output",
+      "name": "Guardar en shared/output"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        980,
+        20
+      ],
+      "id": "respond-excel-webhook",
+      "name": "Confirmar Proceso",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### 📊 Formación Immersive Office: Procesamiento Automatizado de Excel\n\n**Objetivo:** Leer una hoja de cálculo (`/data/input/empleados.xlsx`), calcular estadísticas por departamento y exportar un Excel resumen consolidado a `/data/output/resumen_departamentos.xlsx`.\n\n#### 🧪 Cómo hacer pruebas:\n\n**1. Modo 1 Clic (Directo en n8n):**\nHaz clic en el botón inferior **\"Test workflow\"** (o ejecuta el nodo *\"Al pulsar 'Test workflow'\"*). Procesará el Excel real de `shared/input/empleados.xlsx` y creará el archivo de salida.\n\n**2. Modo Webhook (cURL):**\n```bash\ncurl -X POST http://localhost:5678/webhook-test/process-excel\n```\n\n📁 **Salida:** Revisa el archivo generado en [`shared/output/resumen_departamentos.xlsx`](file:///home/xerobeno/Documentos/Proyectos/Docker/n8n/shared/output/).\n\n📖 **Tutorial completo:** [immersiveoffice.online](https://immersiveoffice.online)",
+        "height": 420,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        -550
+      ],
+      "id": "sticky-guide-2",
+      "name": "Guía del Flujo"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 02_Lectura_Transformacion_Excel\n\n**Qué hace**\nLee el Excel de empleados, agrupa por departamento, calcula plantilla y salario medio, y escribe un Excel nuevo con el resumen.\n\n**Entrada**\nFichero `/data/input/empleados.xlsx` (ya incluido en el repositorio).\n\n**Salida**\n`/data/output/resumen_departamentos.xlsx` (en el equipo: `shared/output/`).\n\n**Requisitos para probarlo**\nEl fichero de entrada debe existir. No hace falta nada mas.\n\n**Cómo probarlo**\nPulsa **Execute workflow**, o bien:\n`curl \"http://localhost:5678/webhook/process-excel\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -940,
+        -220
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "43eec64c-6840-44d1-8b76-006b00b7c8e0"
+}

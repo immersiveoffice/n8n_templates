@@ -1,96 +1,112 @@
 {
-    "name": "14_Backup_Cloud",
-    "nodes": [
-        {
-            "parameters": {
-                "rule": {
-                    "interval": [
-                        {
-                            "field": "days",
-                            "triggerAtHour": 2
-                        }
-                    ]
-                }
-            },
-            "type": "n8n-nodes-base.schedule",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "schedule-trigger",
-            "name": "Schedule"
-        },
-        {
-            "parameters": {
-                "fileSelector": "/data/backup.zip"
-            },
-            "type": "n8n-nodes-base.readBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "read-backup",
-            "name": "Read Backup File"
-        },
-        {
-            "parameters": {
-                "operation": "upload",
-                "fileId": "backup.zip",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.googleDrive",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "upload-gdrive",
-            "name": "Upload to GDrive"
-        },
-        {
-            "parameters": {
-                "bucketName": "my-backups",
-                "fileName": "backup.zip"
-            },
-            "type": "n8n-nodes-base.awsS3",
-            "typeVersion": 1,
-            "position": [
-                400,
-                200
-            ],
-            "id": "upload-s3",
-            "name": "Upload to S3"
-        }
-    ],
-    "connections": {
-        "Schedule": {
-            "main": [
-                [
-                    {
-                        "node": "Read Backup File",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Read Backup File": {
-            "main": [
-                [
-                    {
-                        "node": "Upload to GDrive",
-                        "type": "main",
-                        "index": 0
-                    },
-                    {
-                        "node": "Upload to S3",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Backup File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Backup File": {
+      "main": [
+        [
+          {
+            "node": "Upload to GDrive",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload to S3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "AHENHXtn6lOjA8AC",
+  "meta": null,
+  "name": "14_Backup_Cloud",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "manual-trigger-backup",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/backup.zip"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "read-backup",
+      "name": "Read Backup File"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "fileId": "backup.zip",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 1,
+      "position": [
+        420,
+        -100
+      ],
+      "id": "upload-gdrive",
+      "name": "Upload to GDrive"
+    },
+    {
+      "parameters": {
+        "bucketName": "my-backups",
+        "fileName": "backup.zip"
+      },
+      "type": "n8n-nodes-base.awsS3",
+      "typeVersion": 1,
+      "position": [
+        420,
+        100
+      ],
+      "id": "upload-s3",
+      "name": "Upload to S3"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 14_Backup_Cloud\n\n**Qué hace**\nSube un fichero de copia de seguridad a Google Drive y a Amazon S3.\n\n**Entrada**\n`/data/backup.zip` (generado como muestra).\n\n**Salida**\nFichero subido a ambos destinos.\n\n**Requisitos para probarlo**\n**Credencial OAuth2 de Google Drive** y **credencial de AWS** (access key con permiso `s3:PutObject` y un bucket).\nNinguna de las dos esta configurada. El fichero de entrada SI existe.\n\n**Cómo probarlo**\nSin credenciales no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -220
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "1c9a4d5b-b07f-49aa-a811-c9b8bb486584"
 }

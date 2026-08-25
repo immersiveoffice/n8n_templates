@@ -1,70 +1,94 @@
 {
-    "name": "04_Validacion_Contenido_Email",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "validate-content",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "jsCode": "// Validates email content for forbidden keywords or required terms\n// Expects input: { \"subject\": \"...\", \"body\": \"...\" }\nconst subject = $input.all()[0].json.subject || \"\";\nconst body = $input.all()[0].json.body || \"\";\n\nconst forbiddenKeywords = [\"spam\", \"buy now\", \"click here\"];\nconst requiredKeywords = [\"invoice\", \"project\"];\n\nlet issues = [];\n\nforbiddenKeywords.forEach(word => {\n  if (subject.toLowerCase().includes(word) || body.toLowerCase().includes(word)) {\n    issues.push(`Contains forbidden keyword: ${word}`);\n  }\n});\n\n// Example logic: must contain at least one required keyword if strict mode\n// For now just flagging\n\nreturn {\n  json: {\n    subject,\n    bodyLength: body.length,\n    issues,\n    isValid: issues.length === 0\n  }\n};"
-            },
-            "type": "n8n-nodes-base.code",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "validate-content-code",
-            "name": "Validate Content"
-        },
-        {
-            "parameters": {
-                "options": {}
-            },
-            "type": "n8n-nodes-base.respondToWebhook",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "respond-webhook",
-            "name": "Respond to Webhook"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Validate Content",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Validate Content": {
-            "main": [
-                [
-                    {
-                        "node": "Respond to Webhook",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Content": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "6febY9KzB6ne5rGH",
+  "meta": null,
+  "name": "04_Validacion_Contenido_Email",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "validate-content",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "4d6efc7c-dd27-52b4-8fea-2d9bcf1427d0"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validates email content for forbidden keywords or required terms\n// Expects input: { \"subject\": \"...\", \"body\": \"...\" }\n// El webhook entrega los datos en json.query (GET) o json.body (POST),\n// no en la raiz del item.\nconst inJson = $input.first().json;\nconst has = (o) => o && typeof o === 'object' && Object.keys(o).length > 0;\nconst src = has(inJson.query) ? inJson.query : (has(inJson.body) ? inJson.body : inJson);\nconst subject = src.subject || \"\";\nconst body = src.body || \"\";\n\nconst forbiddenKeywords = [\"spam\", \"buy now\", \"click here\"];\nconst requiredKeywords = [\"invoice\", \"project\"];\n\nlet issues = [];\n\nforbiddenKeywords.forEach(word => {\n  if (subject.toLowerCase().includes(word) || body.toLowerCase().includes(word)) {\n    issues.push(`Contains forbidden keyword: ${word}`);\n  }\n});\n\n// Example logic: must contain at least one required keyword if strict mode\n// For now just flagging\n\nreturn {\n  json: {\n    subject,\n    bodyLength: body.length,\n    issues,\n    isValid: issues.length === 0\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "validate-content-code",
+      "name": "Validate Content"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "respond-webhook",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 04_Validacion_Contenido_Email\n\n**Qué hace**\nRevisa el asunto y el cuerpo de un correo buscando palabras vetadas (spam, buy now, click here).\n\n**Entrada**\nGET con los parametros `subject` y `body`.\n\n**Salida**\nJSON con `subject`, `bodyLength`, `issues` (lista de avisos) y `isValid`.\n\n**Requisitos para probarlo**\nNinguno. Es autocontenido.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/validate-content?subject=Oferta&body=click%20here\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "e6bd39ad-831f-447e-ba5a-9619adfa8780"
 }

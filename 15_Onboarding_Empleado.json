@@ -1,74 +1,106 @@
 {
-    "name": "15_Onboarding_Empleado",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "onboard",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "toEmail": "={{$json.email}}",
-                "subject": "Welcome!",
-                "text": "Welcome to the team!",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.emailSend",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "send-welcome-email",
-            "name": "Send Welcome Email"
-        },
-        {
-            "parameters": {
-                "email": "={{$json.email}}",
-                "name": "={{$json.name}}"
-            },
-            "type": "n8n-nodes-base.slack",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "create-slack-user",
-            "name": "Create Slack User"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Send Welcome Email",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Send Welcome Email": {
-            "main": [
-                [
-                    {
-                        "node": "Create Slack User",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Create Slack User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "Ht8aetRvqqeb4zGm",
+  "meta": null,
+  "name": "15_Onboarding_Empleado",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "onboard",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "3ddd15e1-9915-53f8-b908-860728fff4b5"
+    },
+    {
+      "parameters": {
+        "fromEmail": "rrhh@immersiveoffice.local",
+        "toEmail": "={{ $json.query.email }}",
+        "subject": "=Bienvenido/a a Immersive Office, {{ $json.query.name }}",
+        "text": "=Hola {{ $json.query.name }},\n\nTe damos la bienvenida al equipo. En breve recibiras tus accesos.\n\nRRHH",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "send-welcome-email",
+      "name": "Send Welcome Email",
+      "credentials": {
+        "smtp": {
+          "id": "credSmtpLocal0001",
+          "name": "SMTP local Mailpit (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "email": "={{$json.email}}",
+        "name": "={{$json.name}}"
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "create-slack-user",
+      "name": "Create Slack User",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## 📋 15_Onboarding_Empleado\n\n**Qué hace**\nEnvia el correo de bienvenida a un empleado nuevo. El alta en Slack queda como segundo paso.\n\n**Entrada**\nGET con los parametros `email` y `name`.\n\n**Salida**\nCorreo enviado (visible en Mailpit) + JSON con la confirmacion del servidor SMTP.\n\n**Requisitos para probarlo**\nMailpit levantado y credencial **SMTP local Mailpit**.\nEl nodo **Create Slack User** esta DESHABILITADO: necesita una credencial real de Slack y un canal valido.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/onboard?email=marta@immersiveoffice.local&name=Marta\"`\nBandeja: http://localhost:8025",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "f0007695-4ca0-47fd-ab29-b7ee714ed1a9"
 }

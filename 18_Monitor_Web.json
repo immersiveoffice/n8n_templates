@@ -1,113 +1,172 @@
 {
-    "name": "18_Monitor_Web",
-    "nodes": [
-        {
-            "parameters": {
-                "rule": {
-                    "interval": [
-                        {
-                            "field": "minutes",
-                            "minutesInterval": 5
-                        }
-                    ]
-                }
-            },
-            "type": "n8n-nodes-base.schedule",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "schedule-trigger",
-            "name": "Schedule"
-        },
-        {
-            "parameters": {
-                "url": "https://mywebsite.com",
-                "options": {
-                    "responseCode": true
-                }
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "check-site",
-            "name": "Check Site"
-        },
-        {
-            "parameters": {
-                "conditions": {
-                    "number": [
-                        {
-                            "value1": "={{$json.statusCode}}",
-                            "operation": "notEqual",
-                            "value2": 200
-                        }
-                    ]
-                }
-            },
-            "type": "n8n-nodes-base.if",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "check-status",
-            "name": "If Status != 200"
-        },
-        {
-            "parameters": {
-                "toEmail": "admin@example.com",
-                "subject": "Website Down!",
-                "text": "The website responded with status: {{$json.statusCode}}",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.emailSend",
-            "typeVersion": 1,
-            "position": [
-                600,
-                0
-            ],
-            "id": "alert-email",
-            "name": "Send Alert"
-        }
-    ],
-    "connections": {
-        "Schedule": {
-            "main": [
-                [
-                    {
-                        "node": "Check Site",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Check Site": {
-            "main": [
-                [
-                    {
-                        "node": "If Status != 200",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "If Status != 200": {
-            "main": [
-                [
-                    {
-                        "node": "Send Alert",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Cada 15 Minutos": {
+      "main": [
+        [
+          {
+            "node": "Check Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Site": {
+      "main": [
+        [
+          {
+            "node": "If Status != 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Status != 200": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar a Mano": {
+      "main": [
+        [
+          {
+            "node": "Check Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "Swv2cgOEeJLc0u5g",
+  "meta": null,
+  "name": "18_Monitor_Web",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "schedule-monitor",
+      "name": "Cada 15 Minutos"
+    },
+    {
+      "parameters": {
+        "url": "https://immersiveoffice.online",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "check-site",
+      "name": "Check Site"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.statusCode }}",
+              "operation": "notEqual",
+              "value2": 200
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "check-status",
+      "name": "If Status != 200"
+    },
+    {
+      "parameters": {
+        "fromEmail": "monitor@immersiveoffice.local",
+        "toEmail": "admin@immersiveoffice.local",
+        "subject": "=ALERTA: la web respondio {{ $json.statusCode }}",
+        "text": "=El sitio respondio con codigo {{ $json.statusCode }}.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        660,
+        0
+      ],
+      "id": "send-alert",
+      "name": "Send Alert Email",
+      "credentials": {
+        "smtp": {
+          "id": "credSmtpLocal0001",
+          "name": "SMTP local Mailpit (pruebas)"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "trg-18-man",
+      "name": "Ejecutar a Mano",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 📋 18_Monitor_Web\n\n**Qué hace**\nCada 15 minutos comprueba que la web responde 200. Si no, manda un correo de alerta.\n\n**Entrada**\nNinguna. La URL vigilada esta en el nodo **Check Site**.\n\n**Salida**\nNada si el sitio esta bien; correo de alerta si devuelve algo distinto de 200.\n\n**Requisitos para probarlo**\nMailpit levantado y credencial **SMTP local Mailpit**.\nSe ha anadido un trigger manual (**Ejecutar a Mano**) para poder probarlo sin esperar 15 minutos.\n\n**Cómo probarlo**\nPulsa **Execute workflow**. Para forzar la alerta, cambia la URL por una que falle.",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "1e65f5e1-9ce3-4024-8a09-f5e3c9becff1"
 }

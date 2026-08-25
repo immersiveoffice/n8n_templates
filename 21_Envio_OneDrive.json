@@ -1,74 +1,98 @@
 {
-    "name": "21_Envio_OneDrive",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "onedrive-upload",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "fileSelector": "/data/file.txt"
-            },
-            "type": "n8n-nodes-base.readBinaryFile",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "read-file",
-            "name": "Read File"
-        },
-        {
-            "parameters": {
-                "resource": "file",
-                "operation": "upload",
-                "fileContent": "data",
-                "parentId": "root",
-                "name": "file.txt"
-            },
-            "type": "n8n-nodes-base.microsoftOneDrive",
-            "typeVersion": 1,
-            "position": [
-                400,
-                0
-            ],
-            "id": "onedrive-upload",
-            "name": "OneDrive Upload"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "Read File",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        },
-        "Read File": {
-            "main": [
-                [
-                    {
-                        "node": "OneDrive Upload",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read File": {
+      "main": [
+        [
+          {
+            "node": "OneDrive Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "YWVbEEV4O8AksS5Z",
+  "meta": null,
+  "name": "21_Envio_OneDrive",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "onedrive-upload",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "e844a494-135b-515c-9071-dd3177b7a31c"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/file.txt"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "read-file",
+      "name": "Read File"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "fileContent": "data",
+        "parentId": "root",
+        "name": "file.txt"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "onedrive-upload",
+      "name": "OneDrive Upload"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 21_Envio_OneDrive\n\n**Qué hace**\nLee un fichero del disco y lo sube a OneDrive.\n\n**Entrada**\n`/data/file.txt` (ya existe).\n\n**Salida**\nFichero subido a OneDrive.\n\n**Requisitos para probarlo**\n**Credencial OAuth2 de Microsoft OneDrive.** No configurada.\nHay que registrar una aplicacion en Azure AD con permiso `Files.ReadWrite`.\n\n**Cómo probarlo**\nSin credencial no se puede probar.",
+        "height": 620,
+        "width": 520,
+        "color": 3
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "b519086d-54e9-4b21-afef-4a2ffed57c40"
 }

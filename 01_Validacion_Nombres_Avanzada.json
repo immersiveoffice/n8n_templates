@@ -1,0 +1,158 @@
+{
+  "active": false,
+  "connections": {
+    "Al pulsar 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Casos de Prueba (Múltiples Nombres)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Casos de Prueba (Múltiples Nombres)": {
+      "main": [
+        [
+          {
+            "node": "Normalizar y Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalizar y Validar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar y Validar": {
+      "main": [
+        [
+          {
+            "node": "Responder Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "cKNdNVf51pLYPMJu",
+  "meta": null,
+  "name": "01_Validacion_Nombres_Avanzada",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -100
+      ],
+      "id": "manual-trigger-1",
+      "name": "Al pulsar 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { raw_name: '  mArIa   deL  cARmEn  gArcIa   morALes  ' } },\n  { json: { raw_name: 'juan carlos de la rosa' } },\n  { json: { raw_name: 'Dr. John van der Sar' } },\n  { json: { raw_name: 'Pedro123 Gomez' } },\n  { json: { raw_name: 'Al' } },\n  { json: { raw_name: '' } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        -100
+      ],
+      "id": "mock-test-data",
+      "name": "Casos de Prueba (Múltiples Nombres)"
+    },
+    {
+      "parameters": {
+        "path": "validate-full-name",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        150
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "webhookId": "validate-full-name-hook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================================================\n// Immersive Office - Normalizador y Validador Avanzado de Nombres\n// ==========================================================================\nconst items = $input.all();\nconst results = [];\n\n// Palabras que deben permanecer en minúscula si van en medio (preposiciones/artículos)\nconst lowerWords = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'e', 'van', 'von', 'da', 'di', 'der']);\n\nfor (const item of items) {\n  // Extraer nombre de múltiples fuentes posibles (mock data, body o query)\n  const inputName = item.json.raw_name || item.json.body?.name || item.json.body?.nombre || item.json.query?.name || item.json.query?.nombre || item.json.name || \"\";\n  \n  let raw = String(inputName).trim();\n  let isValid = false;\n  let errors = [];\n  let normalizedName = \"\";\n  let parts = [];\n  let firstName = \"\";\n  let lastName = \"\";\n\n  if (!raw || raw.length === 0) {\n    errors.push(\"El nombre no puede estar vacío.\");\n  } else if (raw.length < 3) {\n    errors.push(\"El nombre debe tener al menos 3 caracteres.\");\n  } else if (/[0-9]/.test(raw)) {\n    errors.push(\"El nombre no puede contener números.\");\n  } else if (/[@#$%^&*()_+=\\[\\]{};:\"\\\\|<>/]/.test(raw)) {\n    errors.push(\"El nombre contiene caracteres especiales no permitidos.\");\n  } else {\n    // Limpiar espacios múltiples\n    const cleaned = raw.replace(/\\s+/g, ' ');\n    const words = cleaned.toLowerCase().split(' ');\n\n    // Capitalizar adecuadamente (Title Case considerando excepciones de partículas)\n    const capitalizedWords = words.map((w, index) => {\n      if (index > 0 && lowerWords.has(w)) {\n        return w;\n      }\n      return w.charAt(0).toUpperCase() + w.slice(1);\n    });\n\n    normalizedName = capitalizedWords.join(' ');\n    parts = capitalizedWords;\n\n    // Segmentar Nombre y Apellidos (heurística española/latina estándar)\n    if (parts.length === 1) {\n      firstName = parts[0];\n      lastName = \"\";\n    } else if (parts.length === 2) {\n      firstName = parts[0];\n      lastName = parts[1];\n    } else if (parts.length >= 3) {\n      firstName = parts.slice(0, parts.length - 2).join(' ');\n      lastName = parts.slice(parts.length - 2).join(' ');\n    }\n\n    isValid = true;\n  }\n\n  results.push({\n    json: {\n      input_original: raw,\n      es_valido: isValid,\n      nombre_normalizado: normalizedName,\n      primer_nombre: firstName,\n      apellidos: lastName,\n      total_palabras: parts.length,\n      errores: errors,\n      procesado_el: new Date().toISOString(),\n      fuente: \"immersiveoffice.online\"\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        120,
+        20
+      ],
+      "id": "sanitize-code",
+      "name": "Normalizar y Validar"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        380,
+        150
+      ],
+      "id": "respond-webhook",
+      "name": "Responder Webhook",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### 🚀 Formación Immersive Office: Validación Avanzada de Nombres\n\n**Objetivo:** Limpiar, sanitizar y separar nombres y apellidos con detección de preposiciones (`de`, `del`, `van`) y control de mayúsculas.\n\n#### 🧪 Cómo hacer pruebas:\n\n**1. Modo 1 Clic (Directo en n8n):**\nHaz clic en el botón inferior **\"Test workflow\"** (o ejecuta el nodo *\"Al pulsar 'Test workflow'\"*). Procesará automáticamente los 6 casos de prueba (válidos, partículas, erróneos).\n\n**2. Modo Webhook (cURL o Navegador):**\n```bash\ncurl -X POST \"http://localhost:5678/webhook-test/validate-full-name\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"name\": \"  jUaN   cArLoS  dE   lA  rOsA  \"}'\n```\n\n📖 **Tutorial completo:** [immersiveoffice.online](https://immersiveoffice.online)",
+        "height": 400,
+        "width": 700
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -550
+      ],
+      "id": "sticky-guide-1",
+      "name": "Guía del Flujo"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 01_Validacion_Nombres_Avanzada\n\n**Qué hace**\nNormaliza y valida nombres de persona: corrige mayusculas, respeta particulas (de, la, del), separa nombre y apellidos y devuelve los errores encontrados.\n\n**Entrada**\nTrigger manual con 6 casos de prueba incluidos, o GET con el parametro `nombre`.\n\n**Salida**\nJSON con `nombre_normalizado`, `primer_nombre`, `apellidos`, `es_valido` y `errores`.\n\n**Requisitos para probarlo**\nNinguno. Es autocontenido.\n\n**Cómo probarlo**\nPulsa **Execute workflow**, o bien:\n`curl \"http://localhost:5678/webhook/validate-full-name?nombre=jos%C3%A9%20MAR%C3%8DA%20de%20la%20cruz\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -220
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "a7e0593a-c086-49ea-a0ca-162285b16b31"
+}

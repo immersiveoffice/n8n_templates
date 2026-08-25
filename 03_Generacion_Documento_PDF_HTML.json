@@ -1,0 +1,208 @@
+{
+  "active": false,
+  "connections": {
+    "Al pulsar 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Datos de Prueba (Cliente Mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Datos de Prueba (Cliente Mock)": {
+      "main": [
+        [
+          {
+            "node": "Leer Plantilla HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Leer Plantilla HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Plantilla HTML": {
+      "main": [
+        [
+          {
+            "node": "Inyectar Datos en Plantilla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inyectar Datos en Plantilla": {
+      "main": [
+        [
+          {
+            "node": "Guardar Documento Generado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Documento Generado": {
+      "main": [
+        [
+          {
+            "node": "Responder al Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "id": "twEmgiidd85u3mxg",
+  "meta": null,
+  "name": "03_Generacion_Documento_PDF_HTML",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -100
+      ],
+      "id": "manual-trigger-3",
+      "name": "Al pulsar 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      nombre_cliente: 'Lucía Fernández Torres',\n      email_cliente: 'lucia.fernandez@globaldev.io',\n      plan_servicio: 'Suscripción Inmersiva Anual + Soporte 24/7',\n      importe_total: '499.00'\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        -100
+      ],
+      "id": "mock-doc-data",
+      "name": "Datos de Prueba (Cliente Mock)"
+    },
+    {
+      "parameters": {
+        "path": "generate-document",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        140
+      ],
+      "id": "webhook-doc",
+      "name": "Webhook Trigger",
+      "webhookId": "generate-doc-hook"
+    },
+    {
+      "parameters": {
+        "filePath": "/data/input/plantilla_contrato.html"
+      },
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        80,
+        20
+      ],
+      "id": "read-template",
+      "name": "Leer Plantilla HTML",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ==========================================================================\n// Immersive Office - Inyección de Variables en Plantilla de Documento\n// ==========================================================================\nconst inputItem = $input.first();\nlet rawHtml = \"\";\n\n// Intentar leer binario del archivo HTML cargado\n// n8n guarda binarios en modo filesystem: hay que pedir el buffer real,\n// no leer binary.data.data (que solo contiene el marcador 'filesystem-v2').\ntry {\n  const buf = await this.helpers.getBinaryDataBuffer(0, 'data');\n  if (buf && buf.length) rawHtml = buf.toString('utf8');\n} catch (e) {}\nif (!rawHtml) {\n  // Plantilla HTML corporativa de fallback para tests standalone\n  rawHtml = `<!DOCTYPE html>\n<html><head><meta charset=\"utf-8\"><title>Contrato {{doc_id}}</title>\n<style>body{font-family:sans-serif;padding:30px;line-height:1.6;color:#333;}.card{background:#f8f9fa;padding:20px;border-radius:8px;border:1px solid #e9ecef;}</style></head>\n<body><h2>Acuerdo de Servicio Corporativo #{{doc_id}}</h2>\n<div class=\"card\"><p><strong>Cliente:</strong> {{nombre_cliente}}</p><p><strong>Email:</strong> {{email_cliente}}</p><p><strong>Plan Contratado:</strong> {{plan_servicio}}</p><p><strong>Importe Total:</strong> {{importe_total}} €</p><p><strong>Fecha de Emisión:</strong> {{fecha_emision}}</p></div></body></html>`;\n}\n\n// Obtener datos del cliente (desde webhook, mock data o fallback)\nlet customer = {};\ntry {\n  customer = $('Datos de Prueba (Cliente Mock)').first()?.json || $('Webhook Trigger').first()?.json?.body || inputItem?.json?.body || inputItem?.json || {};\n} catch (e) {\n  customer = inputItem?.json?.body || inputItem?.json || {};\n}\n\nconst nombre = customer.nombre_cliente || customer.nombre || customer.name || 'Cliente de Prueba';\nconst email = customer.email_cliente || customer.email || 'cliente@ejemplo.com';\nconst plan = customer.plan_servicio || customer.plan || 'Plan Profesional Inmersivo';\nconst importe = String(customer.importe_total || customer.importe || '499.00');\nconst docId = 'IO-' + Math.floor(100000 + Math.random() * 900000);\nconst fecha = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });\n\n// Reemplazo de marcadores dinámicos\nlet renderedHtml = rawHtml\n  .replace(/{{doc_id}}/g, docId)\n  .replace(/{{nombre_cliente}}/g, nombre)\n  .replace(/{{email_cliente}}/g, email)\n  .replace(/{{plan_servicio}}/g, plan)\n  .replace(/{{importe_total}}/g, importe)\n  .replace(/{{fecha_emision}}/g, fecha);\n\nconst cleanName = nombre.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');\nconst filename = `contrato_${cleanName}_${docId}.html`;\n\nreturn {\n  json: {\n    doc_id: docId,\n    nombre_cliente: nombre,\n    email_cliente: email,\n    plan_servicio: plan,\n    importe_total: importe,\n    archivo_generado: filename,\n    ruta_destino: `/data/output/${filename}`,\n    fecha_emision: fecha,\n    estado: \"Documento Generado Exitosamente\"\n  },\n  binary: {\n    data: {\n      data: Buffer.from(renderedHtml, 'utf8').toString('base64'),\n      mimeType: 'text/html',\n      fileName: filename\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        20
+      ],
+      "id": "render-template",
+      "name": "Inyectar Datos en Plantilla"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.ruta_destino }}",
+        "dataPropertyName": "data"
+      },
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        560,
+        20
+      ],
+      "id": "save-generated-doc",
+      "name": "Guardar Documento Generado"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        800,
+        20
+      ],
+      "id": "respond-doc-webhook",
+      "name": "Responder al Cliente",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "### 📄 Formación Immersive Office: Generación Dinámica de Documentos\n\n**Objetivo:** Inyectar datos dinámicos de un cliente en una plantilla HTML corporativa y guardar el contrato listo en `/data/output/`.\n\n#### 🧪 Cómo hacer pruebas:\n\n**1. Modo 1 Clic (Directo en n8n):**\nHaz clic en el botón inferior **\"Test workflow\"** (o ejecuta el nodo *\"Al pulsar 'Test workflow'\"*). Usará los datos del cliente mock y generará el HTML en `shared/output/`.\n\n**2. Modo Webhook (cURL):**\n```bash\ncurl -X POST \"http://localhost:5678/webhook-test/generate-document\" \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\n       \"nombre_cliente\": \"Carlos Mendoza Ruiz\",\n       \"email_cliente\": \"carlos.mendoza@innovacion.com\",\n       \"plan_servicio\": \"Pack Consultoría IA & Automatización\",\n       \"importe_total\": \"650.00\"\n     }'\n```\n\n📁 **Salida:** Revisa el archivo generado en [`shared/output/`](file:///home/xerobeno/Documentos/Proyectos/Docker/n8n/shared/output/).\n\n📖 **Tutorial completo:** [immersiveoffice.online](https://immersiveoffice.online)",
+        "height": 420,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -550
+      ],
+      "id": "sticky-guide-3",
+      "name": "Guía del Flujo"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 03_Generacion_Documento_PDF_HTML\n\n**Qué hace**\nRellena una plantilla HTML de contrato con los datos del cliente y guarda el documento generado.\n\n**Entrada**\nPlantilla `/data/input/plantilla_contrato.html` + datos del cliente (mock incluido o parametros del webhook).\n\n**Salida**\n`/data/output/contrato_<cliente>_<id>.html` y un JSON de confirmacion.\n\n**Requisitos para probarlo**\nLa plantilla debe existir. No hace falta nada mas.\n\n**Cómo probarlo**\nPulsa **Execute workflow**, o bien:\n`curl \"http://localhost:5678/webhook/generate-document\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -220
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "d78e4cd9-19a5-4c3e-8e3e-889abb2dfc9b"
+}

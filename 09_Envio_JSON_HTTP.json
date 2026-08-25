@@ -1,58 +1,75 @@
 {
-    "name": "09_Envio_JSON_HTTP",
-    "nodes": [
-        {
-            "parameters": {
-                "path": "send-json",
-                "responseMode": "lastNode",
-                "options": {}
-            },
-            "type": "n8n-nodes-base.webhook",
-            "typeVersion": 1,
-            "position": [
-                0,
-                0
-            ],
-            "id": "webhook-trigger",
-            "name": "Webhook"
-        },
-        {
-            "parameters": {
-                "method": "POST",
-                "url": "https://api.example.com/endpoint",
-                "sendBody": true,
-                "contentType": "json",
-                "bodyParameters": {
-                    "parameters": [
-                        {
-                            "name": "data",
-                            "value": "={{$json}}"
-                        }
-                    ]
-                },
-                "options": {}
-            },
-            "type": "n8n-nodes-base.httpRequest",
-            "typeVersion": 1,
-            "position": [
-                200,
-                0
-            ],
-            "id": "http-post",
-            "name": "HTTP Request"
-        }
-    ],
-    "connections": {
-        "Webhook": {
-            "main": [
-                [
-                    {
-                        "node": "HTTP Request",
-                        "type": "main",
-                        "index": 0
-                    }
-                ]
-            ]
-        }
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
+  },
+  "id": "X3F247lPlfKlpV42",
+  "meta": null,
+  "name": "09_Envio_JSON_HTTP",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "send-json",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "webhookId": "a550f008-a0dd-5b73-b61e-c9d2254b78a9"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://echo:8080/destino-json",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.query || $json.body || {}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "id": "http-post",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "content": "## 📋 09_Envio_JSON_HTTP\n\n**Qué hace**\nReenvia por POST, en formato JSON, los datos recibidos en el webhook.\n\n**Entrada**\nGET con los parametros que quieras (van al cuerpo del POST).\n\n**Salida**\nRespuesta del servicio destino con el cuerpo recibido.\n\n**Requisitos para probarlo**\nServicio `echo` levantado (contenedor `n8n_test_echo`).\nEn produccion, cambia la URL del nodo **HTTP Request** por la real.\n\n**Cómo probarlo**\n`curl \"http://localhost:5678/webhook/send-json?pedido=ORD-101&importe=249.99\"`",
+        "height": 620,
+        "width": 520,
+        "color": 4
+      },
+      "id": "ficha-flujo",
+      "name": "Ficha del flujo",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        -120
+      ]
+    }
+  ],
+  "pinData": null,
+  "settings": null,
+  "tags": [],
+  "versionId": "6fc0774b-151b-4ef5-a46c-b55f100835d5"
 }
